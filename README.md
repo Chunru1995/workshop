@@ -5,7 +5,7 @@
 * Adam Slez, Associate Professor of Sociology
 * Jon Kropko, Associate Professor of Data Science
 
-###Course times and location:
+### Course times and location:
 Monday, July 17 - Friday, July 28, 9am - 12pm
 Dell 1 Conference room
 Hybrid format with the following Zoom link: TBA
