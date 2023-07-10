@@ -8,7 +8,7 @@
 ### Course times and location:
 * Monday, July 17 - Friday, July 28, 9am - 12pm
 * Dell 1 Conference room (directions to Dell 1: https://goo.gl/maps/Cm2ZkUHvyZQnmqfLA)
-* Hybrid format with the following Zoom link: TBA
+* Hybrid format: Zoom link under "Online Meetings" on course Canvas page
 
 ### UVA Canvas
 Accessible via https://canvas.its.virginia.edu
