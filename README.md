@@ -33,3 +33,8 @@ Scholars, policy makers, union leaders, and development professionals have all s
 * Day 8: Wednesday, July 26 – Network and spatial regression models
 * Day 9: Thursday, July 27 – Dashboards and interactivity apps using Shiny, work to prepare final presentations
 * Day 10: Friday, July 28 – Final preparations
+
+### Class datasets
+* American Community Survey from the U.S. Census, available via the ![tidycensus](https://cran.r-project.org/web/packages/tidycensus/index.html) package for R
+* Historical case disclosure data for H2-A visas: https://www.dol.gov/agencies/eta/foreign-labor/performance
+* ZIP codes with latitude/longitude coordinates: http://download.geonames.org/export/zip/US.zip
