@@ -11,13 +11,13 @@
 * Hybrid format with the following Zoom link: TBA
 
 ### UVA Canvas
-TBA
+Accessible via https://canvas.its.virginia.edu
 
 ### GitHub
 https://github.com/visualizinglabormigration/workshop
 
 ### Microsoft Teams
-"Visualizing Labor Migration Using Quantitative Data" team (invite link posted on Canvas)
+"Visualizing Labor Migration Using Quantitative Data" team (you should have an invitation to this team in your email)
 
 ### Description
 Scholars, policy makers, union leaders, and development professionals have all shown an increasing interest in understanding how labor migration shapes the contours of the global political economy today. Toward this end, the goal of this two-week workshop is for students and instructors to work together to build new public-facing tools for visualizing the flow and distribution of labor migrants throughout North America. Along the way, students will be introduced to key concepts in reproducible research, data visualization, exploratory data analysis, network analysis, and spatial statistics, while gaining hands-on experience working in R—a free and powerful programming language used by social scientists, statisticians, and data scientists alike. We will focus in particular on developing skills using popular packages such as tidyverse, plotly, tidygraph, sf, spdep, and shiny. Experience using R is preferred, but not required. Participants are eligible for a $500 stipend upon completion of the workshop.
