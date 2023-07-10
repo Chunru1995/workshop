@@ -38,3 +38,16 @@ Scholars, policy makers, union leaders, and development professionals have all s
 * American Community Survey from the U.S. Census, available via the [tidycensus](https://cran.r-project.org/web/packages/tidycensus/index.html) package for R
 * Historical case disclosure data for H2-A visas: https://www.dol.gov/agencies/eta/foreign-labor/performance
 * ZIP codes with latitude/longitude coordinates: http://download.geonames.org/export/zip/US.zip
+
+### Instructions for accessing R Studio via Rivanna, UVA's cloud computing environment
+1. Go to https://rivanna-portal.hpc.virginia.edu/
+2. Sign in with your UVA ID and password, and DUO if necessary
+3. Click "My Interactive Sessions"
+4. Click "R Studio Server"
+5. Change "Number of Hours" to 3
+6. Under "Allocation" type: sds_kropkoclass
+7. The R Studio Server box is blue while the system loads, wait for it to turn green
+8. Click "Connect to R Studio Server"
+9. (Just the first time you connect) Click on "terminal" (next to "console")
+10. (Just the first time you connect) Type: cd /scratch/ID where ID is your UVA compute ID (for example /scratch/jk8sd)
+11. (Just the first time you connect) Type: git clone https://github.com/visualizinglabormigration/workshop/
