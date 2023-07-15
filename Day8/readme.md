@@ -1,1 +1,3 @@
-Day 8
+**Day 8: Spatial Regression**
+
+In this module, we will continue our discussion of spatial autocorrelation, with an eye toward the possibility of using spatial regression to capture different forms of spatial dependence. More specifically, we will learn how to test for residual spatial autocorrelation and select an appropriate spatial regression model. We will focus in particular on simultaneous autoregressive (SAR) models taking the form of either a spatial error model or a spatial lag model. Though quite popular, spatial lag models are notoriously difficult to interpret due to the fact that each covariate is associated with a network of effects, rendering the underlying coefficients more or less uninterpretable. With this problem in mind, we with learn how to construct substantively interpretable summaries of the network of effects associated with each variable, as well as how to use simulation to test whether these effects are significant.  
