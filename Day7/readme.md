@@ -1,1 +1,3 @@
-Day 7
+**Day 7: Exploratory Spatial Data Analysis**
+
+In this module, we will learn how to use exploratory spatial data analysis (ESDA) to describe the extent to which spatially similar observations are characterized by similar values on a given variable of interest, such as the prevalence of H-2A workers in the local economy. We will focus in particular on Moran's $I$, a popular measure of spatial autocorrelation. In addition to learning how to calculate Moran's $I$ itself, we will consider a visual counterpart known as the Moran scatterplot. Together, Moran's $I$ and the Moran scatterplot can be used to define and characterize local indicators of spatial association or LISA statistics. We will learn how to calculate LISA statistics, as well as how to map the results. LISA maps are useful tool for depicting spatial clustering in the form of hot and cold spots, as well as the presence of spatial outliers whose values deviate from those of their neighbors.
