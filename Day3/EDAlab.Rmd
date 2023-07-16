@@ -1,0 +1,288 @@
+---
+title: "Analyzing the Gender Wage Gap with R"
+author: 'Programming with R'
+date: "7/31/2020"
+output: 
+     html_document:
+          toc: TRUE
+          toc_depth: 4
+          toc_float: true
+          toc_collapsed: true
+          theme: journal
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Instructions
+Please answer all of the following questions.  Use text, R and markdown code, and the output of code as needed to answer each question completely.  **Prepare your lab report as an HTML document** using the R markdown programming language and the `knitr` library in R.
+
+We start by loading the following packages:
+```{r lib, warning=FALSE, message=FALSE, error=FALSE}
+library(knitr)
+library(DT)
+library(summarytools)
+library(tidyverse)
+```
+
+## Data: The General Social Survey, 2016
+The General Social Survey (GSS) is a sociological survey created and regularly collected since 1972 by the National Opinion Research Center at the University of Chicago. It is funded by the National Science Foundation. The GSS collects information and keeps a historical record of the concerns, experiences, attitudes, and practices of residents of the United States, and it is one of the most important data sources for sociology and political science.
+
+Start by loading the data from the 2016 GSS. We can use the `na` argument to replace all the missing value codes with `NA` here, to save myself this step below.
+```{r loadgss, warning=FALSE, message=FALSE}
+gss <- read_csv("gss.csv", na=c("IAP", "DK", "NA",
+                                "IAP,DK,NA,uncodeable"))
+```
+We keep the following variables:
+```{r selectgss, warning=FALSE, message=FALSE}
+gss <- select(gss, sex, age, artexbt, class, degree,
+              conrinc, facebook, flickr,
+              instagrm, snapchat, tumblr, twitter,
+              vine, whatsapp, happy, hapmar, satjob,
+              health, prestg10, mapres10, papres10)
+```
+
+These variables are 
+
+* `sex`--- respondent's sex
+* `age`--- age of respondent
+* `artexbt`--- did the respondent go to an art exhibit in last 12 months
+* `class`--- what economic class does the respondent identify as?
+* `degree`--- respondent's highest degree
+* `conrinc`--- respondent income in constant dollars
+* `facebook`--- does the respondent use facebook?
+* `flickr`--- does the respondent use flickr?
+* `instagrm`--- does the respondent use instagrm?
+* `snapchat`--- does the respondent use snapchat?
+* `tumblr`--- does the respondent use tumblr?
+* `twitter`--- does the respondent use twitter?
+* `vine`--- does the respondent use vine?
+* `whatsapp`--- does the respondent use whatsapp?
+* `happy`--- respondent's general happiness
+* `hapmar`--- happiness of marriage
+* `satjob`--- work satisfaction
+* `health`--- condition of health
+* `prestg10`--- respondent's occupational prestige score
+* `mapres10`--- respondent's mother's occupational prestige score 
+* `papres10`--- respondent's father's occupational prestige score 
+
+These occupational prestige scores are coded separately by the GSS.  The full description of their methodology for measuring prestige is available here: http://gss.norc.org/Documents/reports/methodological-reports/MR122%20Occupational%20Prestige.pdf Here's a quote to give you an idea about how these scores are calculated:
+
+> Respondents then were given small cards which each had a single occupational titles listed on it. Cards were in English or Spanish. They were given one card at a time in the preordained order. The interviewer then asked the respondent to “please put the card in the box at the top of the ladder if you think that occupation has the highest possible social standing. Put it in the box of the bottom of the ladder if you think it has the lowest possible social standing. If it belongs somewhere in between, just put it in the box that matches the social standing of the occupation.”
+
+Before we can analyze or visualize the data, we need a few data cleaning steps. First, I turn the values of `age` that are currently coded as "89 or older" to just "89". Then, once these words are removed, I coerce the `age` variable to `numeric` class. The line `mutate_if(is.character, as.factor)` is a bit beyond what we've covered, but here's a quick explanation: the `mutate_if()` function tells R to alter every variable in the data for which a logical condition is true. The logical condition is the first argument, and the function to edit the relevant variables is the second argument. In this case, we identify all the `character` class variables with the logical `is.character` function, and we coerce all of these variables to `factor` class with `as.factor`. We also remove the observations that did not report their degrees (this will help us with graphs later): 
+```{r convertfactor, warning=FALSE, message=FALSE}
+gss <- gss %>%
+      mutate(age = fct_recode(age, "89" = "89 or older"),
+             age = as.numeric(as.character(age))) %>%
+      mutate_if(is.character, as.factor) %>%
+      filter(!is.na(degree))
+
+```
+Now that the data are clean, we are ready to start analyzing the data.
+
+## Question 1 {.tabset .tabset-fade}
+### Problem
+The `summary()` function displays the frequency of every category for every factor variable, as well as the mean, median, minimum, maximum, 25th and 75th percentiles for every numeric variable, and also reports the number of missing values for each variable. The problem is the output often doesn't look very good. For example:
+```{r summary}
+summary(gss)
+```
+The text-based `summary()` output is hard to look at, and for more than a few variables it fills the whole screen in a way that makes it hard to find the information we might be looking for.
+
+I found a new R package, `summarytools`, that produces a number of excellent tables for R markdown documents. The function `dfSummary()` produces a fantastic-looking summary table that describes everything that `summary()` does, but also includes distribution graphs.
+
+For this problem, run the following code:
+```{r eval=FALSE, results="asis", warning=FALSE}
+dfSummary(gss, plain.ascii = FALSE, style = "grid", 
+          graph.magnif = 0.75, valid.col = FALSE, 
+          tmp.img.dir = "/tmp", headings = FALSE)
+```
+
+### Answer
+The code is as follows:
+```{r freq, results="asis", warning=FALSE}
+dfSummary(gss, plain.ascii = FALSE, style = "grid", 
+          graph.magnif = 0.75, valid.col = FALSE, 
+          tmp.img.dir = "/tmp", headings = FALSE)
+```
+
+## Question 2 {.tabset .tabset-fade}
+### Problem
+Use a function to display the mean and another function to display the standard deviation of `conrinc`. What do you have to do in order for these calculations to be non-missing? What is a specific reason why we should be skeptical about our estimates of these two statistics?
+
+### Answer
+To find the mean income and the standard deviation of income, we have to use the `mean()` and `sd()` functions with the option `na.rm=TRUE`, otherwise these functions take the missing values into the calculation and return `NA`. The mean income is
+```{r meaninc}
+mean(gss$conrinc, na.rm=TRUE)
+```
+The standard deviation of income is
+```{r sdinc}
+sd(gss$conrinc, na.rm=TRUE)
+```
+We should be skeptical of these estimates because we are skipping over missing values to calculate them.  But why are these values missing to begin with?  If income is more likely to be missing for particular incomes --- for instance, if people with low incomes are less likely to report an income --- then the mean income will appear to be higher than it really is.
+
+## Question 3 {.tabset .tabset-fade}
+### Problem
+What are the 14th, 37th, 62.7th, and 89.152nd percentiles of `prestg10`?
+
+### Answer
+We can use the `quantile()` function with the `probs` option:
+```{r quantile}
+quantile(gss$prestg10, probs = c(.14, .37, .627, .89152), na.rm=TRUE)
+```
+
+## Question 4 {.tabset .tabset-fade}
+### Problem
+Create a cross-tabulation that reports the number of men and women who have and who have not attended an art exhibit. Then report row percents and column percents for this cross-tabulation table. Interpret each of the row percents and column percents in words.
+
+### Answer
+First, we save the table as an object.
+```{r tabobj}
+gsstab <- table(gss$sex, gss$artexbt)
+```
+Then we use the `prop.table()` function.  The default provides cell percents, or the percent of cases that exist in each cell relative to the entire sample size.  However, the question asks for row and column percents.  Row percents are given by the `margin=1` option:
+```{r tabrow}
+kable(prop.table(gsstab, margin=1), caption = "Row percents")
+```
+
+32.9% of women have been to an art exhibit in the last 12 months, and 67.1% have not.  32.6% of men have been to an art exhibit in the last 12 months, and 67.4% have not.
+
+Column percents are given by the `margin=2` option:
+```{r tabcol}
+kable(prop.table(gsstab, margin=2), caption = "Column percents")
+```
+
+52.2% of the people who have not been to an art exhibit in the last 12 months are women, and 47.8% are men. 52.6% of the people who have been to an art exhibit in the last 12 months are women, and 47.4% are men.
+
+## Question 5 {.tabset .tabset-fade}
+### Problem
+Use one command to report the correlations between `prestg10`, `mapres10`, and `papres10`.
+
+### Answer
+The trick here is first creating a subset of the `gss` data with only these variables:
+```{r gssselect}
+gss2 <- select(gss, prestg10, mapres10, papres10)
+```
+Then using `na.omit()` to remove any row that has a missing value for any of these three variables:
+```{r gssselect2}
+gss2 <- na.omit(gss2)
+```
+Then the one command to report the correlations between `prestg10`, `mapres10`, and `papres10` is `cor()`:
+```{r cor}
+cor(gss2)
+```
+
+
+## Question 6 {.tabset .tabset-fade}
+### Problem
+Conduct a paired student's $t$-test to test whether the mean of `mapres10` is equal to the mean of `papres10`. Interpret the result in words.
+
+### Answer
+The code for the t test is:
+```{r ttest}
+t.test(gss$papres10, gss$mapres10, paired=TRUE)
+```
+
+This test adjudicates the null hypothesis that the two variables have the same mean in a paired setting because corresponding observations refer to the same GSS interviewee.  In this case, the null hypothesis is that the respondents' fathers' occupational prestiges equal the respondents' mothers' occupational prestiges, on average. If the p-value is less than .05, we can reject this null hypothesis and conclude that one variable is greater than the other on average.  In this case, we do in fact reject the null, and conclude that, because `papres10` has a higher mean than `mapres10`, that `papres10` is significantly higher than `mapres10` on average.
+
+## Question 7 {.tabset .tabset-fade}
+### Problem
+Conduct a student's $t$-test to test whether the mean of `conrinc` for men is equal to the mean of `conrinc` for women.  Interpret the result in words. [Hint: this is a different use of the `t.test()` function that requires a `formula` argument.  Look at the help page `?t.test`, reference the textbooks, and/or search the web to see examples of how to do a test like this.]
+
+### Answer
+This t-test is run with the following code: 
+```{r ttest2}
+t.test(conrinc ~ sex, data=gss)
+```
+In this case, because $p < .05$, we can reject the null that men and women have equal incomes on average, and so we can conclude that men have significantly higher incomes than women, on average. 
+
+Incidentally, this gender gap is NOT evident when we consider occupational prestiges:
+```{r ttest3}
+t.test(prestg10 ~ sex, data=gss)
+```
+So while men and women have jobs with roughly equal average levels of prestige, men make significantly more money.
+
+
+## Question 8 {.tabset .tabset-fade}
+### Problem
+We can use `group_by()` and `summarize()` to collapse a data frame. When we collapse, we have to specify what summary statistics will appear in the data in place of the original data points.
+
+Using `group_by()` and `summarize()`, create a second data frame for the `gss` that has two rows: one for men and one for women; and has two columns in addition to sex:
+
+* Median income (`conrinc`)
+
+* Mean occupational prestige (`prestg10`)
+
+Use `datatable()` to display a good-looking version of collapsed data. Do there appear to be differences between men and women in terms of income and occupational prestige?
+
+### Answer
+The code is as follows:
+```{r groupbysex}
+gss_sex <- gss %>%
+      group_by(sex) %>%
+      summarize(`Median income` = median(conrinc, na.rm=TRUE),
+                `Mean prestige` = mean(prestg10, na.rm=TRUE))
+datatable(gss_sex)
+```
+
+While men and women have roughly the same levels of occupational prestige on average, the median income among men is more that $12,000 higher than the median income among women. 
+
+## Question 9 {.tabset .tabset-fade}
+### Problem
+Replicate the following violin plot. What does it say about the question of whether men make more money than women? [Hint: because the log scale goes onto the y-axis instead of the x-axis, use `scale_y_continuous()` here.]
+```{r ggplotviolin, echo=FALSE, fig.align="center", fig.width=5, fig.height=5}
+g <- ggplot(gss, aes(x=sex, y=conrinc, fill=sex)) +
+      geom_violin() +
+      ylab("Income (log-2 scale)") +
+      xlab("Sex") +
+      scale_y_continuous(trans="log2", 
+                        breaks = c(500, 1000, 2000, 4000, 8000, 16000, 32000,
+                                   64000, 128000)) +
+      ggtitle("Do men make more money than women?") +
+      guides(fill=FALSE)
+g
+```
+
+### Answer
+```{r ggplotviolin1, fig.align="center", fig.width=5, fig.height=5}
+g <- ggplot(gss, aes(x=sex, y=conrinc, fill=sex)) +
+      geom_violin() +
+      ylab("Income (log-2 scale)") +
+      xlab("Sex") +
+      scale_y_continuous(trans="log2", 
+                        breaks = c(500, 1000, 2000, 4000, 8000, 16000, 32000,
+                                   64000, 128000)) +
+      ggtitle("Do men make more money than women?") +
+      guides(fill=FALSE)
+g
+```
+We take the natural logarithm of income because some incomes in the data are many orders of magnitude larger than other incomes.  Logging income alters the graph so that there is less pronounced clustering around smaller incomes.  
+
+Violin plots get thicker when there are more observations at a particular place on the y-axis. The distribution for men and for women each have similar shapes -- thin at the bottom, becoming bare thin, then opening up to a wide region, thinning out, then getting slightly thicker at the top.  But the shape for women has relatively more people near the bottom, and the wide area occurs lower for women than for men.  The top of the plot for men is relatively thicker than the top of the plot for women.  All of these factors illustrate that men have higher incomes than women in the GSS data.
+
+## Question 10 {.tabset .tabset-fade}
+### Problem
+Replicate the following density plot. What does it tell us about the question of whether men have higher occupational prestige than women?
+```{r gssdist, echo=FALSE, fig.align="center", fig.width=10, fig.height=5}
+g <- ggplot(gss, aes(x=prestg10, fill=sex)) +
+     geom_density(alpha=.5) +
+     xlab("Occupational prestige") +
+     ylab("Density") +
+     ggtitle("Do men have higher occupational prestige than women?")
+g
+```
+
+### Answer
+Density plots are similar to violin plots; the height of the curve represents the relative number of people who have each value of occupational prestige (on the x-axis).  We overlay two densities: one for men and one for women.
+```{r gssdist1, fig.align="center", fig.width=10, fig.height=5}
+g <- ggplot(gss, aes(x=prestg10, fill=sex)) +
+     geom_density(alpha=.5) +
+     xlab("Occupational prestige") +
+     ylab("Density") +
+     ggtitle("Do men have higher occupational prestige than women?")
+g
+```
+The graph indicates a mixed answer to the question.  Slightly more women than men have prestige scores less than 18.  Men and women in equal proportions have prestige scores between 18 and 25.  More women than men have prestige scores between 25 and 33, and more men than women have scores between 33 and 45.  More women than men have scores between 45 and 65, and more men than women have scores greater than 65.
+
+Overall, more men have the highest prestiges, but more men also have lower prestiges.  Women predominantly have jobs with prestiges in the middle to high range, while men occupy the extremes.
