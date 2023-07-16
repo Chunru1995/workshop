@@ -1,1 +1,1 @@
-day 3
+Today we will focus on methods for exploring and understanding data, both through data visualizations using a package named **ggplot2**, and through approaches that use tables and simple hypothesis tests.
