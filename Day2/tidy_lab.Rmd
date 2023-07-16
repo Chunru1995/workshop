@@ -1,0 +1,448 @@
+---
+title: "Lab: Cleaning, Analyzing, and Documenting Data on Cross-National Democracy"
+author: 'Introduction to R Programming: District Data Labs'
+date: "January 30, 2020"
+output: 
+     html_document:
+          toc: TRUE
+          toc_depth: 4
+          toc_float: true
+          toc_collapsed: true
+          theme: journal
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Instructions
+In this lab, you will clean raw data on countries' quality of democratic institutions, government corruption, and health outcomes. Ultimately, we are trying use the data to get answers to the following questions:
+
+1. **What countries in what years achieved the highest levels of democratic quality? What countries in what years had the lowest levels of democracy?**
+
+2. **How does the level of democracy change with different levels of civil liberties and government corruption?**
+
+3. **Does the amount of corruption in a country's government influence the amount of undernourishment in the population?**
+
+The data currently exist in two CSV data files. The first comes from, the Varieties of Democracy (V-Dem) project through the University of Notre Dame (https://www.v-dem.net). From the website:
+
+> Varieties of Democracy (V-Dem) is a new approach to conceptualizing and measuring democracy. We provide a multidimensional and disaggregated dataset that reflects the complexity of the concept of democracy as a system of rule that goes beyond the simple presence of elections. The V-Dem project distinguishes between seven high-level principles of democracy: electoral, liberal, participatory, deliberative, egalitarian, majoritarian and consensual, and collects data to measure these principles. 
+
+In other words, researchers at V-Dem have used careful methods to measure the extent to which each country in the world is democratic. They also measure the presence of civil liberties and the extent of government corruption in each country.
+
+The second dataset contains cross-national time series data from the United Nations and World Health Organization, and includes three variables:
+    
+* The number of physicians per 1000 people
+* The percent of the population that is malnourished
+* Health expenditure per capita
+
+**Our goal:** to create a document that illustrates the entire process of working with these datasets, beginning with loading the raw data into R, and ending with running our analyses and displaying the results. The following questions are designed to guide you through this process. For each one, write code *and text* to explain what the code is doing.
+
+The answers are included for you to check your work as you go along. But try to write the code yourself before checking your answer.
+
+First we load the packages we will need:
+```{r libraries, warning=FALSE, message=FALSE}
+library(knitr)
+library(tidyverse)
+```
+
+## Part 1: Loading and examining the data
+
+### Question 1 {.tabset .tabset-fade}
+#### Problem
+Load the V-Dem and UN datasets into R. Because the V-Dem data file is very big, it takes a minute or two to load on most computers. To save some time, add the `cache=TRUE` argument to the code chunk. When using the `cache=TRUE` argument, an .Rmd file will run the code normally the first time you compile the HTML document. But every subsequent time you compile it will remember the output from this chunk during the previous compilation, so that it can skip the long load time.
+
+#### Answer
+```{r vdemload, cache=TRUE}
+vdem <- read_csv("V-Dem-CY-Core-v9.csv")
+undata <- read_csv("undata.csv")
+```
+
+### Question 2 {.tabset .tabset-fade}
+#### Problem
+Use the `View()` function to look at the spreadsheets of the V-Dem and the UN data. What are some reasons the data are not yet ready for analysis?
+
+#### Answer
+There are many reasons why the two datasets aren't yet ready for analysis. For V-Dem, there are too many variables, and the ones we need have names that are technical and confusing. For the UN data:
+
+1. The variables -- physicians per 1000 people, malnourishment, and health expenditure -- are represented by *rows* in the data, but these need to comprise the columns instead. 
+
+2. The years should be treated as observations in rows, not as variables in columns. 
+
+3. The variable names in either `Series Name` or `Series Code` should be edited to be short and descriptive. 
+
+4. Missing data throughout are represented by ".." and should all be replaced with `NA`.
+
+5. The `Country Name` variable contains entries that are not countries, such as "World" and "Upper middle income" -- these rows will have to be deleted so that all rows refer to comparable units.
+
+## Part 2: Cleaning the individual datasets
+
+### Question 1 {.tabset .tabset-fade}
+#### Problem
+For the V-Dem data, keep only the following variables: `country_name`, `year`, `v2x_polyarchy`, `v2x_corr`, and `v2x_civlib`. 
+
+#### Answer
+We can use the `select()` function:
+```{r vdemselect}
+vdem <- select(vdem, country_name, year, v2x_polyarchy, v2x_corr, v2x_civlib)
+```
+
+
+### Question 2 {.tabset .tabset-fade}
+#### Problem
+For whatever reason, real world data often contains multiple variables that are just different representations of the same information. In the UN data, the `Series Name` and `Series Code` variables tell us exactly the same thing, and the `Country Name` and `Country Code` variables tell us exactly the same thing. Unless I have a very good reason to keep both, I generally prefer to drop variables that are redundant and coded in a less helpful way. So drop `Series Code` and `Country Code`. [Hint: whenever a variable name starts with a number, contains spaces (as is the case with `Series Code`), or contains other symbols like a dash that would be read as an arithmetic operation by R, put backtick single-quotes around the variable name when you call it in `filter()` and other `tidyverse` functions.]
+
+#### Answer
+We delete these two variables with `select()`:
+```{r deleteseriescode}
+undata <- select(undata, -`Series Code`, -`Country Code`)
+```
+
+### Question 3 {.tabset .tabset-fade}
+#### Problem
+`v2x_polyarchy` measures "To what extent is the ideal of electoral democracy in its fullest sense achieved?"; `v2x_corr` measures "How pervasive is political corruption?"; and `v2x_civlib` measures "To what extent is civil liberty respected?" For each variable, higher values indicate higher levels of the concept being measured. Given this information, give each of the variables in V-Dem better, more descriptive names.
+
+#### Answer
+`v2x_polyarchy` is a democracy index, measuring the extent to which "the ideal of electoral democracy in its fullest sense [is] achieved". We can call this variable `democracy`. `v2x_corr` is a measure of how much political corruption exists in a country, and `v2x_civlib` measures the degree to which civil liberties exist in a country. We can name these variables `corrupt` and `civil_lib` respectively. `country_name` and `year` are already descriptive and don't need to be renamed.
+```{r vdemrename}
+vdem <- rename(vdem, democracy=v2x_polyarchy,
+               corrupt=v2x_corr,
+               civil_lib=v2x_civlib)
+```
+
+### Question 4 {.tabset .tabset-fade}
+#### Problem
+For the UN data, use `View()` to scroll all the way to the bottom of the data frame. Notice that the data contain the source and date last updated in five auxiliary rows at the bottom of the data. We cannot leave these rows in the data. Find a way to use the `filter()` function to delete these five rows. 
+
+#### Answer
+There are many ways to delete these rows, but by far the easiest method is to notice that `Country Name` is `NA` on these rows.  We remove these endnotes by deleting the rows with missing values for `Country Name`.  We use `filter()`:
+```{r deleterrowsun, warning=FALSE}
+undata <- filter(undata, !is.na(`Country Name`))
+```
+
+### Question 5 {.tabset .tabset-fade}
+#### Problem
+The UN data contain certain rows that refer to groups of countries instead of to individual countries. To save you some work, here's code to create a vector of these non-countries:
+```{r noncountry}
+noncountry <- c("Arab World", "Caribbean small states", 
+                "Central Europe and the Baltics", "Early-demographic dividend",
+                "East Asia & Pacific", "East Asia & Pacific (excluding high income)", 
+                "East Asia & Pacific (IDA & IBRD countries)", "Euro area", 
+                "Europe & Central Asia", "Europe & Central Asia (excluding high income)", 
+                "Europe & Central Asia (IDA & IBRD countries)", "European Union",
+                "Fragile and conflict affected situations", 
+                "Heavily indebted poor countries (HIPC)", "High income", 
+                "Late-demographic dividend", "Latin America & Caribbean", 
+                "Latin America & Caribbean (excluding high income)", 
+                "Latin America & the Caribbean (IDA & IBRD countries)", 
+                "Least developed countries: UN classification", "Low & middle income", 
+                "Low income", "Lower middle income", "Middle East & North Africa", 
+                "Middle East & North Africa (excluding high income)",
+                "Middle East & North Africa (IDA & IBRD countries)", "Middle income",
+                "North America", "OECD members", "Other small states", 
+                "Pacific island small states", "Post-demographic dividend",
+                "Pre-demographic dividend", "Small states", "South Asia", 
+                "South Asia (IDA & IBRD)", "Sub-Saharan Africa", 
+                "Sub-Saharan Africa (excluding high income)", 
+                "Sub-Saharan Africa (IDA & IBRD countries)", 
+                "Upper middle income",  "World")
+```
+
+Use the `filter()` function and the `!` and `%in%` logical operators to remove these rows. 
+
+#### Answer
+I use one `filter()` function using the `!` and `%in%` operators:
+```{r filternoncountry}
+undata <- filter(undata, !(`Country Name` %in% noncountry))
+```
+
+### Question 6 {.tabset .tabset-fade}
+#### Problem
+Reshape the UN data to move the years from the columns to the rows. (Once the years are in the rows, they will have values such as "1960 [YR1960]".)
+
+#### Answer
+Turning columns into rows requires the `gather()` function.  We set `key="year"` since the variable names indicate years, and `value="data"` since this new column will contain the datapoints for the three variables.
+```{r gatherun}
+undata <- gather(undata, `1960 [YR1960]`:`2015 [YR2015]`, 
+                 key="year", value="data")
+```
+
+### Question 7 {.tabset .tabset-fade}
+#### Problem
+Reshape the UN data to move the values of `Series Name` to separate columns.
+
+#### Answer
+To turn rows into columns, we use `spread()`.  We set `key` to be `Series Name` since this variable contains the names of the variables we are going to create, and we set `value` to `data` since this variable currently exists and contains the data points to populate these new columns:
+```{r unspread}
+undata <- spread(undata, key=`Series Name`, value=data)
+```
+
+
+### Question 8 {.tabset .tabset-fade}
+#### Problem
+We next want to edit the year variable in the UN data to keep only the year, removing the unnecessary "[YR1960]", and to have year read as a `numeric()` class variable. Notice that for all of the values of this variable, the first four characters comprise the year. Use a function that begins `str_` to keep only the first four characters of this variable, then coerce the year variable to a numeric class.
+
+#### Answer
+Our best bet is the `str_sub()` function within `mutate()` to keep the first four characters of `year`. Then within the same call to `mutate()`, we can use `as.numeric()` to coerce the `year` variable to `numeric` class:
+```{r unsubstr}
+undata <- mutate(undata, year = str_sub(year, start=1, end=4),
+                 year = as.numeric(year))
+```
+
+
+### Question 9 {.tabset .tabset-fade}
+#### Problem
+Rename "Country Name" in the UN data to "country_name", and give better names to the health expenditure, physicians, and undernourishment variables. In addition, these three variables are currently coded as `character` class (words), instead of as `numeric` class (numbers). That means we cannot perform any arithmetic calculations with these variables. Use `mutate()` and `as.numeric()` to convert these variables to `numeric` class. .
+
+#### Answer
+First we rename the variables:
+```{r class}
+undata <- rename(undata, 
+                 country_name = "Country Name",
+                 health_expend = "Health expenditure per capita (current US$)",
+                 physicians = "Physicians (per 1,000 people)",
+                 undernourish = "Prevalence of undernourishment (% of population)")
+```
+Then we can coerce these variables to `numeric` class using one `mutate()` function:
+```{r numericun}
+undata <- mutate(undata,
+                 health_expend = as.numeric(health_expend),
+                 physicians = as.numeric(physicians),
+                 undernourish = as.numeric(undernourish))
+```
+
+## Part 3: Merging the two datasets together
+
+### Question 1 {.tabset .tabset-fade}
+#### Problem
+Perform an **ID names check**: make sure that both data frames contain the same information to identify an observation, that these ID variables have the same name in each data frame, and that there are no additional variables with the same name in each data frame.
+
+#### Answer
+Before conducting an ID names check, we must decide which variables in each data set are the ID variables we want to use to match observations.  In both VDEM and the UN data, we want to match on country names and years.  We use `intersect()` to find the variable names that are shared between the two data frames.  This test passes if the ID variables have the same name, and no other variables are shared between VDEM and the UN data.
+```{r idnames}
+intersect(names(vdem), names(undata))
+```
+The intersection contains only the ID variables.  This check passes.
+
+
+### Question 2 {.tabset .tabset-fade}
+#### Problem
+Perform a **unique ID check**: first, decide whether we expect the IDs to uniquely identify rows in one or both data frames.  Explain why or why not for each data frame.  If so, demonstrate that the ID variables uniquely identify the rows.  If not, demonstrate that they don't.
+
+#### Answer
+We expect country name and year to uniquely identify the observations in both data frames. That is, we should not see more than one row with the same country and year.  To check whether this is the case for VDEM, we use `unique()` and `select()` to count the number of unique combinations of ID values.  This check passes if the number of unique IDs equals the number of rows in VDEM:
+```{r idvalues1}
+unique.vdem <- unique(select(vdem, country_name, year))
+nrow(unique.vdem)
+nrow(vdem)
+```
+Next we repeat this check for the UN data:
+```{r idvalues2}
+unique.un <- unique(select(undata, country_name, year))
+nrow(unique.un)
+nrow(undata)
+```
+Both unique ID checks pass.
+
+
+### Question 3 {.tabset .tabset-fade}
+#### Problem
+The next three questions will walk you through an **ID values check**. There are two reasons why ID values in one data frame might not match the ID values in the other data frame: 
+
+* The first reason is that the two data frames have different coverage: they cover different years or countries.  For example, suppose one data frame contains data through 2017 and the other stops at 2015. There's nothing we can do about the data from 2016 and 2017 since there's nothing to match it with in the other data frame. Likewise, suppose that one dataset has separate data for Puerto Rico and the other does not -- then there's nothing we can do to match the observations of Puerto Rico since these rows do not exist in the other the data frame.
+
+* The other reason is that there is a match but we miss it because the same cases are coded with different spellings.  For example, if one data frame has an observation where country is "USA" and the year is "1999", and the other data frame has "United States" with year "99", this is a match but we have to recode some values to get R to recognize the match.
+
+Use `anti_join()` to create A *different, temporary* data frame that has all of the observations in the VDEM data that are not in the UN data.  Use `table()` function to display the country names in this data frame.
+
+#### Answer
+We use `anti_join()` to create this data frame:
+```{r check1}
+vdem <- filter(vdem, year >= 1960)
+check1 <- anti_join(vdem, undata, by=c("country_name", "year"))
+table(check1$country_name)
+```
+
+### Question 4 {.tabset .tabset-fade}
+#### Problem
+Use `anti_join()` to create A *different, temporary* data frame that has all of the observations in the UN data that are not in the VDEM data.  Use `table()` to display the country names in this data frame.
+
+#### Answer
+We use `anti_join()` to create this data frame:
+```{r check2}
+check2 <- anti_join(undata, vdem, by=c("country_name", "year"))
+table(check2$country_name)
+```
+
+### Question 6 {.tabset .tabset-fade}
+#### Problem
+Why is there one observation of Cameroon that appears in the UN data but not the VDEM data? There is a specific historical reason that you can look up.
+
+#### Answer
+You might notice by looking at the data that the observation of Cameroon that exists in the UN data but not the VDEM data is from 1960. There's a reason for that: most of Cameroon gained independence from France on January 1, 1960. But other parts of Cameroon were controlled by the British, and these areas did not join with the independent nation of Cameroon until October 1, 1961. The UN data begins tracking data on Cameroon starting with French independence in 1960, but VDem doesn't start tracking data until unification in 1961.
+
+### Question 7 {.tabset .tabset-fade}
+#### Problem
+Here's a list of all of the countries that would be matched, except for the fact that the country's name is spelled differently in the two data frames.  Here's a start to the list:
+
+* "Burma_Myanmar" in VDEM is "Myanmar" in the UN data
+
+* "Cape Verde" in VDEM is "Cabo Verde" in the UN data
+
+* "Congo_Democratic Republic of" in VDEM is "Congo, Dem. Rep." in the UN data
+
+* "Congo_Republic of the" in VDEM is "Congo, Rep." in the UN data
+
+* "East Timor" in VDEM is "Timor-Leste" in the UN data
+
+* "Egypt" in VDEM is "Egypt, Arab Rep." in the UN data
+
+* "Gambia" in VDEM is "Gambia, The" in the UN data
+
+* "Iran" in VDEM is "Iran, Islamic Rep." in the UN data
+
+* "Ivory Coast" in VDEM is "Cote d'Ivoire" in the UN data
+
+* "Korea_North" in VDEM is "Korea, Dem. People’s Rep." in the UN data
+
+* "Korea_South" in VDEM is "Korea, Rep." in the UN data
+
+* "Kyrgyzstan" in VDEM is "Kyrgyz Republic" in the UN data
+
+* "Laos" in VDEM is "Lao PDR" in the UN data
+
+* "Macedonia" in VDEM is "Macedonia, FYR" in the UN data
+
+* "Russia" in VDEM is "Russian Federation" in the UN data
+
+* "Slovakia" in VDEM is "Slovak Republic" in the UN data
+
+* "Syria" in VDEM is "Syrian Arab Republic" in the UN data
+
+* "Venezuela" in VDEM is "Venezuela, RB" in the UN data
+
+* "Vietnam_Democratic Republic of" in VDEM is "Vietnam" in the UN data
+
+* "Yemen" in VDEM is "Yemen, Rep." in the UN data
+
+We can use `mutate()` and `fct_recode()` to change all of the country names in the UN data that we listed above to the names that are used by VDEM. Then we use `as.character()` to make sure this variable keeps the `character` class.
+
+```{r recodeun}
+undata <- mutate(undata, country_name = fct_recode(country_name,
+                                         "Burma_Myanmar" = "Myanmar",
+                                         "Cape Verde" = "Cabo Verde",
+                                         "Congo_Democratic Republic of" = "Congo, Dem. Rep.",
+                                         "Congo_Republic of the" = "Congo, Rep.",
+                                         "East Timor" = "Timor-Leste",
+                                         "Egypt" = "Egypt, Arab Rep.",
+                                         "Gambia" = "Gambia, The",
+                                         "Iran" = "Iran, Islamic Rep.",
+                                         "Ivory Coast" = "Cote d'Ivoire",
+                                         "Korea_North" = "Korea, Dem. People’s Rep.",
+                                         "Korea_South" = "Korea, Rep.",
+                                         "Kyrgyzstan" = "Kyrgyz Republic",
+                                         "Laos" = "Lao PDR",
+                                         "Macedonia" = "Macedonia, FYR",
+                                         "Russia" = "Russian Federation",
+                                         "Slovakia" = "Slovak Republic",
+                                         "Syria" = "Syrian Arab Republic",
+                                         "Venezuela" = "Venezuela, RB",
+                                         "Vietnam_Democratic Republic of" = "Vietnam",
+                                         "Yemen" = "Yemen, Rep."),
+                 country_name = as.character(country_name))
+```
+
+At this point, any observations that are still not matched should be due entirely to differences in coverage between the two data frames. So now all three pre-merge checks have passed, and we can safely merge the two data frames. Use `inner_join()` to merge the two data frames together. How does `inner_join()` differ from `full_join()`?
+
+#### Answer
+The command to merge the two data frames is:
+```{r innerjoin}
+vdem_un <- inner_join(vdem, undata)
+```
+`inner_join()` differs from `full_join()` in that the observations that are not matched are deleted.  In this case, all of the unmatched observations are due to differences in coverage. Virgin Islands (U.S.), for example, are deleted because they are covered by the UN but not VDEM.
+
+
+## Part 4: Finally, analyzing the data
+
+### Question 1 {.tabset .tabset-fade}
+#### Problem
+Display the 5 country/year combinations with the highest levels of democratic quality (highest values of `v2x_polyarchy`).  Display the 5 country/year combinations with the lowest levels of democratic quality.  Use a function to display these results as well-formatted HTML tables instead of computer code.
+
+#### Answer
+First we sort rows with `arrange()` then we use `kable()` to display the rows: 
+```{r topdemo}
+vdem <- arrange(vdem, -democracy)
+kable(vdem[1:5,])
+```
+
+To display the least democratic countries, we sort from smallest to largest values of the democracy index:
+First we sort rows with `arrange()` then we use `kable()` to display the rows: 
+```{r bottomdemo}
+vdem <- arrange(vdem, democracy)
+kable(vdem[1:5,])
+```
+
+### Question 2 {.tabset .tabset-fade}
+#### Problem
+How closely related are corruption and civil liberties to overall democratic quality? One quick, descriptive way to visualize an answer to these questions is to produce a figure called a **scatterplot**. In a scatterplot every observation receives one point to place on the graph. The x-coordinate of the point is equal to the value of one variable, and the y-coordinate is equal to the value of the other variable.
+
+For example, in the 1970s cars data `mtcars` that comes preloaded in R, each observation is one car:
+```{r mtcars}
+kable(mtcars[1:8,1:5])
+```
+
+We can use `ggplot()` to create a scatterplot with horsepower `hp` on the x-axis, and miles per gallon `mpg` on the y-axis. We will go over this code in detail once we finish our unit on tidy data, but the code is as follows:
+```{r mtcarsplot, fig.height=6, fig.width=6}
+ggplot(mtcars, aes(x=hp, y=mpg)) +
+     geom_point(alpha=1) +
+     geom_smooth(method="lm") +
+     xlab("Horsepower") +
+     ylab("Miles per gallon")
+```
+
+The line `geom_smooth(method="lm")` is important because it draws the **line of best fit** through the scatterplot. We will talk about the math behind drawing this line later in the semester. In general, if the line slopes upward, it means that the variable on the x-axis has a *positive* effect on the variable on the y-axis: as x increases, y tends to increase. If the line slopes downward, it means that the variable on the x-axis has a *negative* effect on the variable on the y-axis: as x increases, y tends to decrease. In this case, horsepower has a negative effect on MPG: the more horsepower, the less fuel efficient the car.
+
+The `alpha=1` argument inside of `geom_point()` sets the level of transparency of each point. When `alpha=1`, the points are completely solid and when `alpha=0` the points are completely transparent. When there are a lot of datapoints, it is useful to make the points partially transparent so that the areas on the graph with more points become darker than the areas with fewer points. For the two graphs you will create, set `alpha=.05`.
+
+Using the above code as a model, create two scatterplots, one with democracy on the x-axis and corruption on the y-axis, and one with democracy on the x-axis and civil liberties on the y-axis.^[We can argue (and political scientists have argued for many decades) about which variable belongs on the x-axis, indicating the cause, and which variable belongs on the y-axis, indicating the effect. In these graphs, place democracy on the x-axis, but please know that we can easily make a case for switching the axes.] Make sure the axes are labelled correctly. Write a sentence for each scatterplot describing what the slope of the best-fit line tells us.
+
+#### Answer
+The scatterplot of democracy and corruption is as follows:
+```{r scatter1, fig.height=6, fig.width=6}
+ggplot(vdem, aes(x=democracy, y=corrupt)) +
+     geom_point(alpha=.05) +
+     geom_smooth(method="lm") +
+     xlab("Democratic Quality (V-Dem Polyarchy Index)") +
+     ylab("Corruption")
+```
+
+The negative slope indicates that as democratic quality increases, the amount of corruption in a country goes down.
+
+The scatterplot of democracy and civil liberties is as follows:
+```{r scatter2, fig.height=6, fig.width=6}
+ggplot(vdem, aes(x=democracy, y=civil_lib)) +
+     geom_point(alpha=.05) +
+     geom_smooth(method="lm") +
+     xlab("Democratic Quality (V-Dem Polyarchy Index)") +
+     ylab("Degree of civil liberties")
+```
+
+The positive slope indicates that as democratic quality increases, the degree to which civil liberties are respected goes up.
+
+### Question 3 {.tabset .tabset-fade}
+#### Problem
+Now that the VDEM and UN data frames have been merged, let's see whether there is a relationship between the amount of corruption in a country (the continuous version of this variable, not the categorical one) and the amount of undernourishment in the population. Using the code you used on problem set 4 as a model, create a scatterplot with corruption on the x-axis and malnourishment on the y-axis. Make sure both axes have descriptive labels. Also include a best-fit line. In a sentence or two, describe what this figure tells us.
+
+[Note: we can only plot points for observations in which both corruption and undernourishment are non-missing. When I make my plot, I lose 5795 of the 8345 observations I have in the merged data. That happens because the original data providers (mostly the UN) did not record these variables for these observations. There's nothing I can do about that unless I want to use a method like multiple imputation to fill in missing values -- unfortunately, multiple imputation is both complicated and susceptible to error. Missing data is one of the biggest and one of the most ignored problems in data analysis, and by far the best way to handle missing data is to take steps to get complete data at the collection stage, if at all possible.]
+
+#### Answer
+The code to create this scatterplot is as follows:
+```{r figcorrupt, fig.width=6, fig.height=6}
+ggplot(vdem_un, aes(x=corrupt, y=undernourish)) +
+      geom_point(alpha=.25) +
+      geom_smooth(method="lm") +
+      xlab("Corruption") +
+      ylab("Undernourishment")
+```
+
+This figure shows us that, while there is a great deal of variance and randomness in the data, there is also an overall trend that countries with more corruption also have higher rates of undernourishment in the population.
