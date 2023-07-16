@@ -1,1 +1,1 @@
-Day 1
+Today we will get started learning the basics of R and R Studio. We will use markdown code to create web-enabled documents that combine text, code, the results of code, and data visualizations, and we will end the day by creating our own websites.
