@@ -1,1 +1,1 @@
-
+Today we will learn the basics of linear and logistic regressions, the workhorse models of econometrics and applied statistics in the social sciences and the foundations of machine learning, including some of the math underlying these models and how to interpret their results.
