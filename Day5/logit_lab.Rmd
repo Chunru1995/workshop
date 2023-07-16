@@ -1,0 +1,567 @@
+---
+title: "Lab: Using Logistic Regression to Understand Who Survived the Titanic"
+author: 'Introduction to R Programming: District Data Labs'
+date: "January 31, 2020"
+output: 
+     html_document:
+          toc: TRUE
+          toc_depth: 4
+          toc_float: true
+          toc_collapsed: true
+          theme: journal
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Instructions
+The most widely used model for explaining an outcome with only two values (0 and 1, yes and no, etc.) is **logistic regression**, also called "logit". In this lab, you will use logistic regression on data from the passenger list of the Titanic to understand who lived and who did not. Load the following packages:
+```{r lib, message=FALSE, warning=FALSE}
+library(knitr)
+library(margins)
+library(tidyverse)
+library(stargazer)
+```
+Then read through the data section below to load the data. The cleaning steps are already completed.
+
+The answers are included for you to check your work as you go along. But try to write the code yourself before checking your answer.
+
+
+## Part 1: The danger of the phrase "percent more likely"
+### Question 1 {.tabset .tabset-fade}
+#### Problem
+Probabilites, rates, ratios, odds.  These terms can be confusing as hell. It can make understanding social science extremely difficult for a non-scientifically trained audience (and even may scientifically trained ones!). For example, suppose that we have two groups of people, group A and group B, and that there is some societal outcome we are measuring.  Let's say that 5 out of every 100 people in group A have the outcome of interest and 15 out of 100 people in group B have the outcome. 
+
+* One way to express this effect is with **probability** by dividing the number of people with the outcome in each group by the number of people in each group.  In this case P(outcome) = .05 for group A and P(outcome) = .15 for group B. 
+
+* A **marginal change in probability** or **marginal effect** is the difference in probability given two distinct values of $x$.  In this case, the effect of being in group A compared to group B is .15 - .05 = .10. Some people phrase this result as "group A is 10 percentage points more likely to experience the outcome than group B."
+
+* Another way to to express the result is as a **relative risk ratio**, which is the quotient of the two probabilities, which in this case is .15/.05 = 3.  Some people phrase this result as "group A is 3 times more likely to experience the outcome than group B," or as "group A is 200 percent more likely to experience the outcome than group B." (That's not a typo - to get to percent increases from the relative risk ratio, subtract 1, then multiply by 100.  That's why a ratio of 2 is a 100% increase.)
+
+* **Odds** divide the probability of the outcome happening by the probability that the outcome doesn't happen.  The odds of the outcome happening for group A are .5/.95 = 1/19. The odds of the outcome happening for group B are .15/.85 = 3/17. 
+
+* Logit models can express results as **odds ratios**, which divides the odds for one group by the odds for the other group. In this case, the odds ratio of the outcome happening for group B relative to group A are: (3/17) / (1/19) = 3.35.  Incredibily, many researchers phrase these results as "group A is 3.35 more likely to experience the outcome than group B" or "group A is 235% more likely to experience the outcome than group B".
+
+For this first question, do a google search and find 3 news articles that describe scientific finding with one of the above five quantities.  Report which quantities the article use (if there's more than one, report all of them and note which ones appear in the headline).  Are the articles clear about which statistic they are using?
+
+#### Answer
+I found the following articles by doing a google search on the phrase "percent more likely".
+
+The first article is publiched by CNS news, which appears to be a partisan, conservative website: https://www.cnsnews.com/news/article/ali-meyer/women-now-33-more-likely-men-earn-college-degrees  
+The article is headlined "Women Now 33% More Likely Than Men to Earn College Degrees", but the article quotes the Bureau of Labor Statistics "Thirty-two percent of women had earned a bachelor's degree, compared with 24 percent of men," and proceeds to explain "[t]he 32 percent of women with college degrees was 8 points--or 33.3 percent--more than the 24 percent of men." In this case, the 33% in the headline is a **relative risk ratio** because 32/24 = 1.3333. The article reports probabilities, P(degree)=.24 for men and P(degree)=.32 for women, and reports the marginal change in probability as 8 points because the difference between these probabilities is .08.
+
+The second article, from a business magazine named Inc, is headlined "Study: 60 Percent of Employees Are More Likely to Suffer a Heart Attack if Their Bosses Have These Traits": https://www.inc.com/marcel-schwantes/study-60-percent-of-employees-are-more-likely-to-s.html
+In the headline it is unclear what sort of statistic 60 percent refers to, or how "more likely" is calculated.  This article summarized the results of a medical journal study as follows: "employees who had managers with the following [negative] traits were 60 percent more likely to have suffered a heart attack or other life-threatening cardiac condition" and does not elaborate further.  Suppose group A consists of employees with terrible bosses and group B consists of employees with good bosses. This result could be a marginal effect if it is the case that P(heart attack) = .7 for group A and .1 for group B, for example. It could be a relative risk ratio if P(heart attack) = .16 for group A and .1 for group B, for example.  It could be an odds ratio P(heart attack) = .151 for group A and .1 for group B, since (.151/.849)/(.1/.9) = 1.6, for example. Out of curiousity I looked up the original research article in the Journal of Occupational and Environmental Medicine (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2602855/). The "60% more likely" result is actually something called a **hazard ratio**, which is similar to an odds ratio, though more complex, for a specialized statistical model called a survival model. 
+
+The third article is from the Reuters news wire, headlined "False news 70 percent more likely to spread on Twitter: study" (https://www.reuters.com/article/us-usa-cyber-twitter/false-news-70-percent-more-likely-to-spread-on-twitter-study-idUSKCN1GK2QQ).  It is unclear from the headline what statistic "70 percent more likely" refers to. This article summarizes a study that appeared in the journal Science, but does not elaborate on whether this result refers to marginal effects, relative risks, odds ratios, or something else.  I looked up the original study (http://science.sciencemag.org/content/359/6380/1146) and found the following sentence: "When we estimated a model of the likelihood of retweeting, we found that falsehoods were 70% more likely to be retweeted than the truth . . . even when controlling for the account age, activity level, and number of followers and followees of the original tweeter, as well as whether the original tweeter was a verified user" (359). It sounds like a logit interpretation, and sure enough (see Figure 4b) it is an **odds ratio**.  The actual probabilities are hard to parse from this article, but they appear to be very small -- exactly the situation where odds ratios can be the most misleading.
+
+## Data: Survivors of the Titanic
+The following data contains observations of the passengers of the Titanic during the voyage in which the Titanic collided with an iceberg and sunk. Many people on board were evacuated to life boats, and many other people died. From [Wikipedia](https://en.wikipedia.org/wiki/Passengers_of_the_RMS_Titanic#Survivors_and_victims):
+
+>A total of 2,208 people sailed on the maiden voyage of the RMS Titanic, the second of the White Star Line's Olympic-class ocean liners, from Southampton, England, to New York City. Partway through the voyage, the ship struck an iceberg and sank in the early morning of 15 April 1912, resulting in the deaths of over 1,500 people, including about 815 of the passengers.
+
+> The Titanic's passengers were divided into three separate classes, determined not only by the price of their ticket, but also by wealth and social class: those travelling in first class, most of them the wealthiest passengers on board, included prominent members of the upper class, businessmen, politicians, high-ranking military personnel, industrialists, bankers, entertainers, socialites, and professional athletes. Second-class passengers were middle-class travellers and included professors, authors, clergymen, and tourists. Third-class or steerage passengers were primarily emigrants moving to the United States and Canada.
+
+> Titanic's passengers numbered 2,208 people: 319 in first class, 272 in second class, and 709 in third class. Of these, 1680 were male and 434 were female; 112 children were aboard, the largest number of which were in third class.The ship was considerably under capacity on her maiden voyage, as she could accommodate 2,453 passengers—833 first class, 614 second class, and 1,006 third class.
+
+It is thought that because women and children boarded lifeboats first, that women were more likely than men, and children were more likely than adults to have survived. It is also thought that first class passengers were more likely to survive than second or third class passengers, as the the second and third class cabins were on lower decks, and possibly because the crew prioritized the first class passengers for seats in the lifeboats.
+
+Your goal in this problem set is to determine the factors that **predict who survived and who did not survive** the Titanic disaster. The data come from <kaggle.com>, which is a fantastic resource for finding cool datasets and practicing data science and statistics. The specific project is here: <https://www.kaggle.com/c/titanic>
+
+First, we load the "training" data (we'll work with the test data later in this lab):
+```{r titanic1}
+titanic <- read.csv("titanic_train.csv")
+```
+The variables are as follows:
+
+* `survival` -- whether this individual survived, 0 = No, 1 = Yes
+
+* `pclass -- ticket class: 1 = 1st, 2 = 2nd, 3 = 3rd
+
+* `sex` -- Sex (314 female, 577 male) 	
+
+* `Age` -- Age in years 	
+
+* `sibsp` -- # of siblings / spouses aboard the Titanic 	
+
+* `parch` -- # of parents / children aboard the Titanic 	
+
+* `ticket` -- Ticket number 	
+
+* `fare` -- Passenger fare (British pounds)
+
+* `cabin` -- Cabin number 	
+
+* `embarked` -- 	Port of Embarkation: C = Cherbourg, Q = Queenstown, S = 
+Southampton
+
+## Part 2: Running logit models and interpreting odds ratios
+### Question 1 {.tabset .tabset-fade}
+#### Problem
+Run a logit model on the Titanic data in which the outcome is whether or not each person survives, and the independent variables are ticket class (treated as unordered categorical with 3rd class as the base category), sex, age, and fare. Display the full results.
+
+#### Answer
+First, I coerce `Pclass` to the `factor` class, and I use `fct_relevel()` to set 3rd class as the first category:
+```{r relevel2}
+titanic <- mutate(titanic, Pclass = as.factor(Pclass),
+                  Pclass = fct_relevel(Pclass, "3", "1", "2")
+                  )
+```
+
+The logit model and the full results are as follows:
+```{r logit}
+logit <- glm(Survived ~ Pclass + Sex + Age + Fare,
+             data = titanic, family=binomial(link="logit"))
+summary(logit)
+```
+Here is the stargazer version of the table:
+```{r stargaze1, results="asis", message=FALSE}
+stargazer(logit,
+          type = "html",
+          title = "Who Survived the Titanic?",
+          dep.var.labels = "Survived?",
+          covariate.labels = c("First class (vs. third class)", 
+                               "Second class (vs. third class)", 
+                               "Men (vs. women)",
+                               "Age", 
+                               "Ticket fare"))
+```     
+
+### Question 2 {.tabset .tabset-fade}
+#### Problem
+What specifically do the coefficients of this logit model tell us?
+
+#### Answer
+The coefficients themselves only can convey the direction of an effect (through the sign of the coefficient) and whether or not the coefficient is significantly different from zero. 
+
+* People in first class are more likely to survive than people in third class, after taking into account sex, age, and ticket fare. This coefficient is significantly different from zero, indicating that we have enough evidence to conclude that there is a nonzero effect.
+
+* People in second class are more likely to survive than people in third class, after taking into account sex, age, and ticket fare. This coefficient is significantly different from zero, indicating that we have enough evidence to conclude that there is a nonzero effect.
+
+* Men are less likely to survive than women, after taking into account the ticket class, age, and ticket fare. This coefficient is significantly different from zero, indicating that we have enough evidence to conclude that there is a nonzero effect.
+
+* Older people are less likely to survive, after taking into account the ticket class, sex, and ticket fare. This coefficient is significantly different from zero, indicating that we have enough evidence to conclude that there is a nonzero effect.
+
+* The higher the ticket fare, the more likely a person is to survive, after taking into account the ticket class, sex, and age. This coefficient is not significantly different from zero, however, indicating that we do not have enough evidence to conclude that there is a nonzero effect.
+
+### Question 3 {.tabset .tabset-fade}
+#### Problem
+Calculate and display the odds ratios from the logit model. Provide an interpretation for each odds ratio result.
+
+#### Answer
+The odds ratios are the exponentiated coefficients, displayed here:
+```{r oddsratios2}
+oddsratios <- exp(coef(logit))
+oddsratios
+```
+These odds ratio results are interpreted as follows:
+
+* `Pclass1` --- Passengers with a first class ticket, as compared to passengers with a third class ticket, have odds of surviving that are 12.7 times higher (or 1,170% higher), on average, controlling for sex, age, and ticket fare.
+
+* `Pclass2` --- Passengers with a second class ticket, as compared to passengers with a third class ticket, have odds of surviving that are 3.5 times higher (or 250% higher), on average, controlling for sex, age, and ticket fare.
+
+* `Sex` --- Men, as compared to women, have odds of surviving that are 92% lower, on average, controlling for ticket class, age, and ticket fare.
+
+* `Age` --- For every additional year of a person's age, their odds of survival decrease by 3.7%, on average, controlling for ticket class, sex, and ticket fare.
+
+* `Fare` --- For every additional pound a person pays in fare, the odds the person survives increases by .05%, on average, controlling for ticket class, sex, and age.
+
+
+## Example: How to use the `margins` package to create more sensible interpretations from logit models 
+### Data: 2016 ANES time series
+The previous part of this lab walked you through the calculation and interpretation of odds ratios.  You saw the pros and cons of these statistics.  We can usually do better than odds ratios by calculating the **probability** of the outcome given values of each $x$ variable, or **marginal changes** or **differences** in these probabilities as the values of an $x variable change.
+
+As an example, I will show you how to use the relevant functions using the 2016 ANES time series data.  If you haven't yet done so, please install the `margins` package:
+```{r installpack, eval=FALSE}
+install.packages("margins")
+```
+Then load the packages and the ANES data:
+```{r libload, message=FALSE, warning=FALSE}
+library(margins)
+anes <- read_csv("anes_timeseries_2016.csv")
+```
+The following code cleans the ANES data and prepares it for a logit model:
+```{r logitclean}
+ftf.gender <- anes$V161002
+
+anes <- mutate(anes, 
+               id = V160001, 
+               vote = factor(V161031),
+               age = as.numeric(V161267), 
+               marital = factor(V161268), 
+               education = factor(V161270), 
+               union = factor(V161302), 
+               race = factor(V161310x), 
+               gender = factor(V161342))
+anes <- dplyr::select(anes, -starts_with("V16"))
+
+anes <- mutate(anes,
+               vote = fct_recode(vote,
+                                 "Trump" = "2. Donald Trump",
+                                 "Clinton" = "1. Hillary Clinton", 
+                                 NULL = "-1", 
+                                 NULL = "3. Gary Johnson", 
+                                 NULL = "4. Jill Stein", 
+                                 NULL = "5. Other candidate {SPECIFY}", 
+                                 NULL = "6. Other specify - specified as: DK", 
+                                 NULL = "7. Other specify - specified as: RF",
+                                 NULL = "8. Other specify - specified as: none/no one/NA",
+                                 NULL = "-8. Don't know (FTF only)", 
+                                 NULL = "-9. Refused"),
+               marital = fct_recode(marital,
+                                    NULL = "-9. Refused",
+                                    "Married" = "1. Married: spouse present",
+                                    "Married" = "2. Married: spouse absent [FTF ONLY: volunteered]",
+                                    "No longer married" = "3. Widowed",
+                                    "No longer married" = "4. Divorced",
+                                    "No longer married" = "5. Separated",
+                                    "Never married" = "6. Never married"),
+               education  = fct_recode(education,
+                                       NULL = "-9. Refused",
+                                       "Less than HS" = "1. Less than 1st grade",
+                                       "Less than HS" = "2. 1st, 2nd, 3rd or 4th grade",
+                                       "Less than HS" = "3. 5th or 6th grade",
+                                       "Less than HS" = "4. 7th or 8th grade",
+                                       "Less than HS" = "5. 9th grade",
+                                       "Less than HS" = "6. 10th grade",
+                                       "Less than HS" = "7. 11th grade",
+                                       "Less than HS" = "8. 12th grade no diploma",
+                                       "HS diploma" = "9. High school graduate- high school diploma or equivalent (for example: GED)",
+                                       "Some college" = "10. Some college but no degree",
+                                       "Some college" = "11. Associate degree in college - occupational/vocational program",
+                                       "Some college" = "12. Associate degree in college -- academic program",
+                                       "College degree" = "13. Bachelor's degree (for example: BA, AB, BS)",
+                                       "Graduate degree" = "14. Master's degree (for example: MA, MS, MENG, MED, MSW, MBA)",
+                                       "Graduate degree" = "15. Professional school degree (for example: MD, DDS, DVM, LLB, JD)",
+                                       "Graduate degree" = "16. Doctorate degree (for example: PHD, EDD)",
+                                       "HS diploma" = "90. Other specify given as: high school graduate",
+                                       NULL = "95. Other SPECIFY"),
+               education = fct_relevel(education, "HS diploma", "Less than HS", 
+                                       "Some college", "College degree", "Graduate degree"),
+               union = fct_recode(union,
+                                  NULL = "-8. Don't know (FTF only)",
+                                  NULL = "-9. Refused",
+                                  "1" = "1. Yes",
+                                  "0" = "2. No" ),
+               union = as.numeric(as.character(union)),
+               race = fct_recode(race, 
+                                 NULL = "-9. Missing",
+                                 "White" = "1. White, non-Hispanic",
+                                 "Black" = "2. Black, non-Hispanic",
+                                 "Other" = "3. Asian, native Hawaiian or other Pacif Islr,non-Hispanic",
+                                 "Other" = "4. Native American or Alaska Native, non-Hispanic",
+                                 "Hispanic" = "5. Hispanic",
+                                 "Other" = "6. Other non-Hispanic incl multiple races [WEB: blank 'Other' counted as a race]"),
+               gender = fct_recode(gender,
+                                   NULL = "-9. Refused",
+                                   "Male" = "1. Male",
+                                   "Female" = "2. Female",
+                                   "Other" = "3. Other"))
+
+anes$gender[is.na(anes$gender) & ftf.gender == "1. Male"] <- "Male"
+anes$gender[is.na(anes$gender) & ftf.gender == "2. Female"] <- "Female"
+```
+The dependent variable is `vote`. Among the individuals who chose one of the two main party candidates, Hillary Clinton got 1570 votes and Trump got 1357 votes:
+```{r votetab}
+table(anes$vote)
+```
+As is, the logistic regression will treat Trump as the 1s category and Clinton as the 0s category, so that all the results speak to the likelihood of voting for Trump over Clinton.  I want to reverse that, so I use the `fct_relevel()` function:
+```{r relevel}
+anes <- mutate(anes, vote = fct_relevel(vote, "Trump", "Clinton"))
+table(anes$vote)
+```
+
+### Logit model and odds ratios
+I run a logit model to predict people's votes.  I regress the vote on age, marital status (relative to married), education (relative to high school diploma), race (relative to white), and gender (relative to male):
+```{r logitanes}
+logit <- glm(vote ~ age + marital + education + 
+                  union + race + gender,
+             data = anes, family=binomial(link="logit"))
+summary(logit)
+```
+The odds ratios from this model are:
+```{r oddsanes}
+exp(coef(logit))
+````
+
+### Marginal effects
+The most useful statistic to estimate from a logit model is **marginal change in probability**.  These statistics are interpreted in a way that is very similar to regular regression coefficients.  To be specific, if the marginal effect of a variable $x$ is $m$, the interpretation is:
+> A one-unit increase in $x$ is associated with an $m$ change in the probability that $y=1$, on average, controlling for the other $x$ variables in the model.
+
+Like before, we have to plug in the unit of $x$ and the name of $x$.  We have to plug in the marginal effect $m$ (the analogue of the coefficient), and interpret it in terms of the probability of $y=1$. We should also plug in the name of $y$, the category represented by 1, and the control variables.  The marginal effects for this example are:
+```{r margeffanes, cache=TRUE}
+m <- margins(logit, type = "response")
+summary(m)
+```
+The marginal effects are in the column marked AME.  Some of the interpretations are as follows:
+
+* Becoming one year older is associated with a .0005 decrease in the probability that a person votes for Clinton, on average, controlling for education, gender, marital status, race, and union membership. We have 95% confidence that this marginal effect is between a .0016 decrease and a .0006 increase in probability. This marginal effect is not significantly different from 0 at the 95% level.
+
+* Individuals with a college degree, compared to individuals with a high school diploma, have a probability of voting for Hilliary Clinton that is .1031 higher, on average, controlling for age, gender, marital status, race, and union membership. We have 95% confidence that this difference is between a .0502 and .1561 increase in probability.  This difference is significantly different from 0 at the 95% level.
+
+* Black people, compared to white people, have a probability of voting for Hilliary Clinton that is .5321 higher, on average, controlling for age, education, gender, marital status, and union membership. We have 95% confidence that this difference is between a .5035 and .5606 increase in probability.  This difference is significantly different from 0 at the 95% level.
+
+**Note**: there are some subtle differences between the way these interpretations should be phrased.  Marginal effects express the *additive*, not multiplicative, change in probability.  If the marginal effect is .25, that might express a change from a .5 probability of voting for Clinton to a .75 probability.  Don't use the word "precent" in these interpretations, unless you say "percentage point".  In other words, it is correct to say "a .25 increase in probability" or "a 25 percentage point increase in probability" but it is incorrect to say "a 25 percent increase in the probability". (Technically speaking, an increase from .5 to .75 is a 50% increase.)
+
+### Conditional predicted value and average marginal effect plots (the `cplot` function)
+A useful way to express the effect of categorical $x$ variables on the probability of the outcome is to calculate the average probability of the outcome for each category, along with the 95% confidence interval of each probability, and to plot them.  The `cplot()` function makes nice graphs for this purpose.  To use it, specify the object where you saved your logit model results, the name of the categorical $x$ variable (in quotes) to plot on the $x$-axis, and `what="prediction"` to make sure this graph displays predicted probability.  
+
+For example, here are the probabilities for the race categories:
+```{r cplot1, fig.align="center", fig.width=5, fig.height=5}
+cplot(logit, "race", what="prediction")
+```
+The $y$-axis is the probability of voting for Clinton by the different race categories.  The vertical lines are the 95% confidence intervals for each probability.
+
+Here's another graph for education:
+```{r cplot2, fig.align="center", fig.width=8, fig.height=5}
+cplot(logit, "education", what="prediction")
+```
+
+And here's the graph for marital status:
+```{r cplot23, fig.align="center", fig.width=6, fig.height=5}
+cplot(logit, "marital", what="prediction")
+```
+
+For continous $x$ variables, the $cplot()$ function draws a line to represent all of the values of $x$.  It also draws a grey area around the line to represent the 95% confidence interval at any point.  Here's the plot for age.
+```{r cplot4, fig.align="center", fig.width=8, fig.height=5}
+cplot(logit, "age", what="prediction")
+```
+
+These graphs aren't always the prettiest, nor are they particularly easy to change.  But there is a way to send their output to `ggplot()` for prettier graphs and more control.  First, instead of calling `cplot()` directly, save it to an object using the `as.data.frame()` function to convert the output to a data frame. Use `draw=FALSE` to avoid having `knitr` draw the graph again:
+```{r cplotobj}
+c <- as.data.frame(cplot(logit, "race", what="prediction", draw=FALSE))
+c
+```
+
+Now that the contents of `c` are a data frame, we can use `ggplot()` to make a prettier graph, for example:
+```{r ggplotcplot, fig.align="center", fig.width=5, fig.height=5}
+g <- ggplot(c, aes(x = xvals, y = yvals, col=xvals)) +
+     geom_point() +
+     geom_linerange(aes(ymin=lower, ymax=upper)) +
+     xlab("Race") +
+     ylab("Probability of voting for Hillary Clinton") +
+     ggtitle("Probability of Voting for Clinton by Race") +
+     guides(col=FALSE)
+g
+```
+
+## Part 3: Using the `margins` package yourself
+### Question 1 {.tabset .tabset-fade}
+#### Problem
+Returning to the logit model in part 2, produce a table of margins effects.  Interpret every marginal effect, along with the confidence interval and p-value.
+
+#### Answer
+First, I rerun the logit model from part 1:
+```{r logittitanic2}
+logit <- glm(Survived ~ Pclass + Sex + Age + Fare,
+             data = titanic, family=binomial(link="logit"))
+summary(logit)
+```
+Then, using the margins command, I find the following marginal changes in probability:
+```{r marginsgss}
+m <- margins(logit, type="response")
+summary(m)
+```
+These marginal effect results are interpreted as follows:
+
+* age --- Every additional year of age is associated with a 0.5 percentage point decrease in the probability of surviving, on average, controlling for ticket class, fare, and sex. With 95% confidence, this marginal effect is between a 0.7 and 0.3 percentage point decrease. The p-value means that there is less than a .0001 probability that the marginal effect, divided by its standard error, could be at least as far from 0 as it is, given that the null is a marginal effect of 0.  Given that p < .05, we conclude that the marginal effect is significantly different from 0. Another way to phrase the marginal effect is: Every additional 20 years of age is associated with a 10 percentage point decrease in the probability of surviving, on average, controlling for ticket class, fare, and sex.
+
+* sex --- Men, compared to women, have a probability of survival that is 47.3 percentage points lower, on average, controlling for age, ticket class, and fare. With 95% confidence, this marginal effect is between a 54.1 and 40.6 percentage point decrease. The p-value means that there is less than a .0001 probability that the marginal effect, divided by its standard error, could be at least as far from 0 as it is, given that the null is a marginal effect of 0.  Given that p < .05, we conclude that the marginal effect is significantly different from 0.
+
+* first class --- Passengers with a first class ticket, as compared to passengers with a third class ticket, have a probability of survival that is 41.8 percentage points higher, on average, after controlling for sex, age, and fare. With 95% confidence, this marginal effect is between a 32 and 51.6 percentage point increse. The p-value means that there is less than a .0001 probability that the marginal effect, divided by its standard error, could be at least as far from 0 as it is, given that the null is a marginal effect of 0.  Given that p < .05, we conclude that the marginal effect is significantly different from 0.
+
+* second class --- Passengers with a second class ticket, as compared to passengers with a third class ticket, have a probability of survival that is 19.4 percentage points higher, on average, after controlling for sex, age, and fare. With 95% confidence, this marginal effect is between a 11.9 and 26.8 percentage point increse. The p-value means that there is less than a .0001 probability that the marginal effect, divided by its standard error, could be at least as far from 0 as it is, given that the null is a marginal effect of 0.  Given that p < .05, we conclude that the marginal effect is significantly different from 0.
+
+* fare --- For every additional pound spent on the ticket, a passenger's probability of survival increases by .01 percentage points, on average, after controlling for age, sex, and ticket class. With 95% confidence, this marginal effect is between a .06 percentage point decrease and a .07 percentage point increase. The p-value means that there is a .817 probability that the marginal effect, divided by its standard error, could be at least as far from 0 as it is, given that the null is a marginal effect of 0.  Given that p < .05, we cannot conclude that the marginal effect is significantly different from 0.
+
+### Question 2 {.tabset .tabset-fade}
+#### Problem
+Produce two graphs (which don't need to be especially pretty). For the first, create a graph that that shows the probability of survival for men and for women. For the second, create a graph that shows the probability of survival for the three ticket classes.
+
+How do the conclusions you draw from these graph compare to the odds ratios for sex and ticket class you found in part 2?
+
+#### Answer
+First let's create the graph for sex. We use the `cplot()` function to create this graph:
+```{r gssplot1, fig.align="center", fig.width=5, fig.height=5}
+cplot(logit, "Sex", what="prediction")
+```
+This graph means that women have about a .54 probability of surviving, and men have about a .07 probability of surviving, for a difference of about .47.  That conveys the relationship between sex and survival clearly. It is much less dramatically stated than saying that men are 92% less likely than women to survive. It also provide needed context that the odds ratio does not -- about half of the women died, and nearly all of the men.
+
+Next we create the graph for ticket class:
+```{r gssplot2, fig.align="center", fig.width=5, fig.height=5}
+cplot(logit, "Pclass", what="prediction")
+```
+
+This graph shows that while third class passengers had on average a .08 probability of survival, first and second class passengers had .54 and .26 average probabilities, respectively. This graph illustrates that first, second, and third class passengers had roughly 50, 25, and 10 percent survival rates, and that both conveys the effect of ticket class on survival and provides understandable context. In short, first class passengers were about five times more likely to survive than third class passengers, and second class passengers were 2.5 times more likely to survive than third class passengers. That is accurate and intuitive, and better than the hyperbolic statements -- first and second class passengers have "odds" of survival that are 12.7 and 3.5 times higher than the "odds" for third class passengers -- made by odds ratios.
+
+### Question 3 {.tabset .tabset-fade}
+#### Problem
+Produce the two graphs in question 2 again, but this time use `ggplot()` to make the graphs as pretty as possible.
+
+#### Answer
+First I save each graph as an object:
+```{r gssplotsave}
+c1 <- as.data.frame(cplot(logit, "Sex", what="prediction", draw=FALSE))
+c2 <- as.data.frame(cplot(logit, "Pclass", what="prediction", draw=FALSE))
+```
+Here's a prettier version of the graph for sex:
+```{r ggplotcplot2, fig.align="center", fig.width=5, fig.height=5}
+g <- ggplot(c1, aes(x = xvals, y = yvals, col=xvals)) +
+     geom_point() +
+     geom_errorbar(aes(ymin=lower, ymax=upper)) +
+     xlab("Sex") +
+     ylab("Probability of survival") +
+     ggtitle("Probability That Men and Women Survive the Titanic") +
+     guides(col=FALSE)
+g
+```
+
+```{r ggplotcplot3, fig.align="center", fig.width=8, fig.height=5}
+g <- ggplot(c2, aes(x = xvals, y = yvals, col=xvals)) +
+     geom_point() +
+     geom_errorbar(aes(ymin=lower, ymax=upper)) +
+     xlab("Ticket Class") +
+     ylab("Probability of survival") +
+     ggtitle("Probability That First, Second, and Third Class Passengers Survival the Titanic") +
+     guides(col=FALSE)
+g
+```
+
+### Question 4 {.tabset .tabset-fade}
+#### Problem
+Produce a plot of the probability of survival for different values of age. 
+
+#### Answer
+We can also use the `cplot()` function here, but the difference is that given a continuous (`numeric` class) variable the `cplot()` function draws a line to represent the full set of marginal effects across the range of the variable, along with a grey region around the line to represent the 95% confidence interval for each marginal effect.  The graph for age is:
+```{r ageplot, fig.align="center", fig.width=5, fig.height=5}
+cplot(logit, "Age", what="prediction")
+```
+
+## Part 4: Out of Sample Prediction (Or, Your Gateway Into Machine Learning)
+### Question 1 {.tabset .tabset-fade}
+#### Problem
+In part 3, you used the `margins()` function to calculate marginal changes in probability and you used `cplot()` to plot average predicted probability. But there's a more fine grained function, `predict()`, that uses a logit model to calculate the probability that each individual in the data would survive.
+
+To use `predict()`, you need to specify three arguments:
+
+1. `object` -- the name of the object that contains your logit model results
+
+2. `newdata` -- the name of the data frame that contains the observations you want to calculate probabilities for 
+
+3. `type="response"` -- Type this exactly. This tells R to calculate predicted probability and not another quantity instead. 
+
+Use `predict()` to create a new variable in the `titanic` data (not `titanic.test` yet) that contains the predicted probability that each passenger would have survived.
+
+#### Answer
+We use `predict()` within `mutate()`:
+```{r prob1}
+titanic <- titanic %>%
+      mutate(prob.survive = predict(logit, newdata=titanic, type="response"))
+```
+
+### Question 2 {.tabset .tabset-fade}
+#### Problem
+Which passenger had the greatest change of survival? Which passenger had the lowest chance of survival? Were the model's expectations met in these two cases? What was it about these two passengers that led the model to assign these probabilities?
+
+#### Answer
+To see the passenger with the lowest probability of survival, we can use `arrange()` to sort the probability variable from lowest to highest, then we can display the first observation:
+```{r lowest}
+titanic <- titanic %>%
+      arrange(prob.survive)
+titanic[1,]
+```
+The person with the lowest chance of survival was Mr. Johan Svensson, age 74, who paid 7.775 for a third class ticket. His probability of survival was only 0.017, and indeed, he did not survive. The model assigned a low probability of survival to Mr. Svensson because of his sex, his old age, and his third class ticket.
+
+To see the passenger with the highest probability of survival, we can use `arrange()` to sort the probability variable from highest to lowest, then we can again display the first observation:
+```{r highest}
+titanic <- titanic %>%
+      arrange(-prob.survive)
+titanic[1,]
+```
+The person with the highest chance of survival was Miss Helen Loraine Allison, age 2, who's parents paid 151.55 for a first class ticket. Her probability of survival was 0.977, but sadly, she did not survive. The model assigned a high probability of survival to her because of her sex, her young age, and her first class ticket.
+
+### Question 3 {.tabset .tabset-fade}
+#### Problem
+Use `ggplot()` to create two overlaid density plots: one illustrating the distribution of survival probabilities for passengers who did not survive, and one illustrating the distribution of survival probabilities for passengers who did survive.
+
+A couple things to do to help you make this figure:
+
+1. Create a `factor` version of the `Survived` variable, labeling 0 as "Didn't survive" and 1 as "Survived". Then pass this factor variable to the `fill` argument within the main `aes()` function inside `ggplot()`.
+
+2. Within `geom_density()` use the `alpha=.5` argument to generate some transparency, to see both curves clearly.
+
+Does the model predict who survives as well as it predicts who doesn't survive?
+
+#### Answer
+First I create the factor variable:
+```{r titanicfactor}
+titanic <- titanic %>%
+      mutate(survive.factor = as.factor(Survived),
+             survive.factor = fct_recode(survive.factor,
+                                         "Survived" = "1",
+                                         "Didn't survive" = "0"))
+```
+The graph is as follows:
+```{r ggplotdist, fig.width=8, fig.height=5}
+ggplot(titanic, aes(x=prob.survive, fill=as.factor(survive.factor))) +
+      geom_density(alpha=.5) +
+      xlab("Probability of survival") +
+      ylab("Density") +
+      ggtitle("How well do probabilities predict survival?") +
+      guides(fill=guide_legend(title=""))
+```
+
+The model predicts who doesn't survive quite well, assigning a very low survival probability to many of the passengers who did not survive. But it does not perform as well in predicting who survives -- many of the people who survive are assigned rather low survival probabilities.
+
+### Question 4 {.tabset .tabset-fade}
+#### Problem
+One way to assess the fit of a model is with a statistic called a **root mean squared error (RMSE)**. You are creating a single calculation from the following steps:
+
+1. Create a variable that contains the differences between the observed outcome (`Survived`) and the predicted outcome (the probability variable you created in question 2)
+
+2. Square these differences
+
+3. Take the mean of the squared differences
+
+4. Take the square root of the mean. This number is the RMSE.
+
+Calculate the RMSE of the predicted probabilities for the observations in the `titanic` data.
+
+#### Answer
+The calculation of the RMSE in several steps is as follows:
+```{r rmse2}
+errors <- titanic$Survived - titanic$prob.survive
+squared.errors <- errors^2
+mean.squared.errors <- mean(squared.errors, na.rm=TRUE)
+rmse <- sqrt(mean.squared.errors)
+rmse
+```
+
+Alternatively, the calculation of the RMSE in one step is as follows:
+```{r rmse3}
+rmse <- sqrt(mean((titanic$Survived - titanic$prob.survive)^2, na.rm=TRUE))
+rmse
+```
+
+### Question 5 {.tabset .tabset-fade}
+Machine learning is very focused on the goal of creating accurate predictions for observations **outside of the dataset you used to fit your model**. A key concept is construction of TRAINING and TEST sets from a larger data frame. The first step in performing machine learning is to take your data and randomly divide the rows into two separate data frames. The first one is called the training set, and you use this set to obtain parameter estimates for a model, such as logistic regression. But how do you know if this model is good or not? The best way is to generate forecasts for the outcomes of the observations in the other data frame (the test set). Because you didn't use the test set to build your model, this data frame provides a good assessment of how well your model works in broader contexts.
+
+For the Titanic data, some passengers were chosen at random to be removed from the data you used to run your logit model, and were placed in a second data frame. We will use this second data frame to evaluate the performance of this logit model. First, we load the new data:
+```{r titanictest}
+titanic.test <- read.csv("titanic_test.csv")
+```
+
+#### Problem
+Generate predicted probabilities for the observations in `titanic.test`. If you are feeling bold, try joing the Kaggle competition to see how your predictions stack up: <https://www.kaggle.com/c/titanic/>
+
+#### Answer
+The tricky part here is remembering to convert `Pclass` to a factor class variable the way we did all the way back in part 2.
+```{r testconvert}
+titanic.test <- mutate(titanic.test, Pclass = as.factor(Pclass))
+```
+Now we are ready to predict the outcomes for the passengers in the test set:
+```{r testpred}
+titanic.test <- titanic.test %>%
+      mutate(prob.survive = predict(logit, newdata=titanic.test, type="response"))
+```

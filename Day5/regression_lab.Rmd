@@ -1,0 +1,409 @@
+---
+title: "Lab: Using Linear Regression to Understand Occupational Prestige"
+author: 'Introduction to R Programming: District Data Labs'
+date: "January 31, 2020"
+output: 
+     html_document:
+          toc: TRUE
+          toc_depth: 4
+          toc_float: true
+          toc_collapsed: true
+          theme: journal
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Instructions
+Once you've gone through all of the steps to clean a dataset, it's time pull meaningful results from the data. One of the most important techniques we have is **linear regression**. In this lab, you will use linear regression on data from a major national sociological survey to understand how some people end up in occuptations with higher prestige than others. Load the following packages:
+```{r lib, message=FALSE, warning=FALSE}
+library(knitr)
+library(tidyverse)
+library(stargazer)
+```
+Then read through the data section below to load the data. The cleaning steps are already completed.
+
+The answers are included for you to check your work as you go along. But try to write the code yourself before checking your answer.
+
+## Data: The General Social Survey, 2016
+The General Social Survey (GSS) is a sociological survey created and regularly collected since 1972 by the National Opinion Research Center at the University of Chicago. It is funded by the National Science Foundation. The GSS collects information and keeps a historical record of the concerns, experiences, attitudes, and practices of residents of the United States, and it is one of the most important data sources for sociology and political science.
+
+Start by loading the data from the 2016 GSS. We can use the `na` argument to replace all the missing value codes with `NA` here, to save myself this step below.
+```{r loadgss, warning=FALSE, message=FALSE}
+gss <- read_csv("gss.csv", na=c("IAP", "DK", "NA",
+                                "IAP,DK,NA,uncodeable"))
+```
+We keep the following variables:
+```{r selectgss, warning=FALSE, message=FALSE}
+gss <- select(gss, sex, age, artexbt, class, degree,
+              conrinc, facebook, flickr,
+              instagrm, snapchat, tumblr, twitter,
+              vine, whatsapp, happy, hapmar, satjob,
+              health, prestg10, mapres10, papres10)
+```
+
+These variables are 
+
+* `sex`--- respondent's sex
+* `age`--- age of respondent
+* `artexbt`--- did the respondent go to an art exhibit in last 12 months
+* `class`--- what economic class does the respondent identify as?
+* `degree`--- respondent's highest degree
+* `conrinc`--- respondent income in constant dollars
+* `facebook`--- does the respondent use facebook?
+* `flickr`--- does the respondent use flickr?
+* `instagrm`--- does the respondent use instagrm?
+* `snapchat`--- does the respondent use snapchat?
+* `tumblr`--- does the respondent use tumblr?
+* `twitter`--- does the respondent use twitter?
+* `vine`--- does the respondent use vine?
+* `whatsapp`--- does the respondent use whatsapp?
+* `happy`--- respondent's general happiness
+* `hapmar`--- happiness of marriage
+* `satjob`--- work satisfaction
+* `health`--- condition of health
+* `prestg10`--- respondent's occupational prestige score
+* `mapres10`--- respondent's mother's occupational prestige score 
+* `papres10`--- respondent's father's occupational prestige score 
+
+These occupational prestige scores are coded separately by the GSS.  The full description of their methodology for measuring prestige is available here: http://gss.norc.org/Documents/reports/methodological-reports/MR122%20Occupational%20Prestige.pdf Here's a quote to give you an idea about how these scores are calculated:
+
+> Respondents then were given small cards which each had a single occupational titles listed on it. Cards were in English or Spanish. They were given one card at a time in the preordained order. The interviewer then asked the respondent to “please put the card in the box at the top of the ladder if you think that occupation has the highest possible social standing. Put it in the box of the bottom of the ladder if you think it has the lowest possible social standing. If it belongs somewhere in between, just put it in the box that matches the social standing of the occupation.”
+
+Before we can analyze or visualize the data, we need a few data cleaning steps. First, I turn the values of `age` that are currently coded as "89 or older" to just "89". Then, once these words are removed, I coerce the `age` variable to `numeric` class. The line `mutate_if(is.character, as.factor)` is a bit beyond what we've covered, but here's a quick explanation: the `mutate_if()` function tells R to alter every variable in the data for which a logical condition is true. The logical condition is the first argument, and the function to edit the relevant variables is the second argument. In this case, we identify all the `character` class variables with the logical `is.character` function, and we coerce all of these variables to `factor` class with `as.factor`. We also remove the observations that did not report their degrees (this will help us with graphs later): 
+```{r convertfactor, warning=FALSE, message=FALSE}
+gss <- gss %>%
+      mutate(age = fct_recode(age, "89" = "89 or older"),
+             age = as.numeric(as.character(age))) %>%
+      mutate_if(is.character, as.factor) %>%
+      filter(!is.na(degree))
+
+```
+Now that the data are clean, we are ready to start analyzing the data.
+
+## Part 1: Running linear regression models in R
+The function to perform a linear regression in R is `lm()`.  In this part of the lab, you will use this function to run single regressions (one independent variable and no controls) and multiple regressions (at least one control).
+
+### Question 1 {.tabset .tabset-fade}
+#### Problem
+Create a scatterplot with income on the $x$-axis and occupational prestige score on the $y$-axis.  Overlay a best fit line on top of this scatterplot.  Use labels and a title to make this graphic publication-quality.  What does the sign of the slope of the best-fit line tell you about the relationship between income and occupational prestige (positive slopes move upward left-to-right, negative slopes move downward left-to-right)?
+
+#### Answer
+I use `ggplot()`:
+```{r ggplot, fig.align="center", fig.width=6, fig.height=6}
+g <- ggplot(gss, aes(x=conrinc, y=prestg10)) +
+      geom_point() +
+      geom_smooth(method="lm") +
+      xlab("Income") +
+      ylab("Occupational prestige") +
+      ggtitle("Does income have anything to do with occupational prestige?")
+g
+```
+The slope of the best-fit line is positive, which indicates that jobs with higher income have more prestige.
+
+### Question 2 {.tabset .tabset-fade}
+#### Problem
+Use the `lm()` function to run a single regression of **occupational prestige on income** (the lingo we use for regressions is that the dependent variable is regressed on the independent variable). To display the results in a good-looking HTML table, use the `stargazer()` function from the `stargazer` package. For example, if you saved the regression output in an object named `reg`, the code to produce a nice-looking regression table is
+```{r stargaze0, results="asis", message=FALSE, eval=FALSE}
+stargazer(reg,
+          type = "html",
+          title = "Does income have anything to do with occupational prestige?",
+          dep.var.labels = "Occupational prestige",
+          covariate.labels = "Income")
+```
+In order for this table to display, you have to specify `results="asis"` in the code chunk options (and NOT `eval=FALSE`).
+
+#### Answer
+I will display two versions of the results: first, the output that appears in the R console when using the `summary()` function.
+```{r reg}
+reg <- lm(prestg10 ~ conrinc, data=gss)
+summary(reg)
+```
+Second, the output from `stargazer`:
+```{r stargaze, results="asis", message=FALSE}
+stargazer(reg,
+          type = "html",
+          title = "Does income have anything to do with occupational prestige?",
+          dep.var.labels = "Occupational prestige",
+          covariate.labels = "Income")
+```
+
+### Question 3 {.tabset .tabset-fade}
+#### Problem
+Interpret the coefficient.  Be complete, but also communicate this interpretation with writing that is more eloquent than the template for interpreting coefficients. [Note: the notation e-04 means "move the decimal point four spaces to the left"]
+
+#### Answer
+The template is:
+
+> A one-unit increase in X is associated with a $\beta$ change in Y, on average, after controlling for the other X variables in the model.
+
+Plugging in the relevant parts of this template for the single linear regression from part 1, question 2, we get
+
+> A one-dollar increase in income is associated with a .0001375 increase in occupational prestige, on average. (No control variables to mention)
+
+Without trying to change this coefficient (yet), a better phrasing is
+
+> For every one-dollar increase in income, occupational prestige increases by .0001375 points, on average.
+
+### Question 4 {.tabset .tabset-fade}
+#### Problem
+Interpret the intercept, then, supposing we included age as a control variable, explain why the intercept would be meaningless.
+
+#### Answer
+The intercept is the average value of Y assumming that all of the X variables, whether they are of theoretical interest or controls, are simultaneously 0.  The intercept from the regression in part 1, question 2 is 39.96, which means
+
+> The average prestige score for individuals with no income is 39.96.
+
+If we add age as a control, then the interpretation changes to a situation in which both income and age are 0, which implies
+
+> The average prestige score for newborn infants with no income is . . .
+
+The intercept in the class is meaningless because the situation in which age=0 is meaningless when considering something like occupational income.
+
+### Question 5 {.tabset .tabset-fade}
+#### Problem
+Even when no control variables are necessary, and even with the best and most complete interpretation of the coefficient in question 1, the interpretation won't be very meaningful to a general audience.  Why?  What can you do to better convey the relationship between these two variables? After taking this step to improve the interpretation of the coefficient, does there appear to be a strong relationship between income and occupational prestige? 
+
+#### Answer
+Even when phrased well, the interpretation from question 1 is not very meaningful because it relates the effect of a ONE DOLLAR increase in income.  To better relate what's happening, we should consider a larger increase in income. To convey the effect of a $1000 increase in income, we multiply the coefficient by 1000:
+
+> For every $1000 increase in income, occupational prestige increases by .1375 points, on average.
+
+This interpretation better illustrates what is happening in the data, but it also demonstrates that income has a *small* effect on prestige, since .1375 is very little compared to the 0 to 100 scale of prestige.  Note, the "highly" significant p-value associated with this coefficient says **nothing** about the size of this effect. 
+
+### Question 6 {.tabset .tabset-fade}
+#### Problem
+Choose 4 additional variables in the data to include as control variables.  For each one, describe why we might think the control is necessary -- remember, that means describing why you think each contol is related to both the outcome, occupational prestige, and the main independent variable, income. Just one or the other is not enough to necessitate including the control variable.
+
+Then run the regression with occupational prestige as the dependent variable and income as the independent variable, along with these controls. Interpret ONLY the coefficient on income. Does your conclusion about the effect of income on prestige change?
+
+#### Answer
+I choose to include the following controls, for the following reasons:
+
+* age: with more time to establish their careers, older people are more likely to have higher incomes, and more likely to have more occupational prestige
+
+* degree: more education can lead both to higher incomes and to greater levels of prestige
+
+* papres10 and mapres10: parents with greater levels of occupational prestige are able to transfer wealth to their children and set them up to also have careers with greater degrees of prestige
+
+The regression that includes these controls is as follows:
+```{r regcontrol}
+reg <- lm(prestg10 ~ conrinc + age + degree + papres10 + mapres10, data=gss)
+summary(reg)
+```
+The `stargazer` output is:
+```{r stargaze2.5, results="asis", message=FALSE}
+stargazer(reg,
+          type = "html",
+          title = "Does income have anything to do with occupational prestige?",
+          dep.var.labels = "Occupational prestige",
+          covariate.labels = c("Income", "Age", "Graduate vs. Bachelor degree",
+                               "High school vs. Bachelor degree",
+                               "Junior college vs. Bachelor degree",
+                               "Less than high school vs. Bachelor degree",
+                               "Father's Occupational Prestige",
+                               "Mother's Occupational Prestige"),
+          digits = 6)
+``` 
+The coefficient on income is still positive, and statistically significantly different from 0, but is now .000059 which is about half of what it was without the controls. Specifically, the interpretation is
+
+> For every $1000 increase in income, occupational prestige increases by .059 points, on average.
+
+We conclude that there is an effect, but that it is even smaller than we had thought before taking the controls into account.
+
+### Question 7 {.tabset .tabset-fade}
+#### Problem
+Use the `lm()` function to regress occupational prestige on degree.  Treat degree as an unordered-categorical variable, and set high school diploma to be the base category. Provide a well-written interpretation of each of the coefficients.
+
+#### Answer
+First, we check the order of the categories of degree:
+```{r table}
+table(gss$degree)
+```
+At present, bachelor degree is set as the first category and will be the base in the regression.  For high school diploma to be the base, we must rearrange these categories:
+```{r relevel}
+gss <- mutate(gss, degree = fct_relevel(degree, "high school", 
+                                        "lt high school",
+                                        "junior college",
+                                        "bachelor",
+                                        "graduate"))
+```
+Here is the R console output:
+```{r reg4}
+reg <- lm(prestg10 ~ degree, data=gss)
+summary(reg)
+```
+And here is the `stargazer` output:
+```{r stargaze4, results="asis", message=FALSE}
+stargazer(reg,
+          type = "html",
+          title = "Does education have anything to do with occupational prestige?",
+          dep.var.labels = "Occupational prestige",
+          covariate.labels = c("Less than high school vs. High school",
+                               "Junior college vs. High school",
+                               "Bachelor vs. High school",
+                               "Graduate vs. High school"))
+```     
+
+The interpretation of the coefficients are as follows:
+
+> Compared to people with a high school diploma, people who did not get a high school diploma have occupational prestige scores that are 4.78 points lower, on average.
+
+> Compared to people with a high school diploma, people who have a degree from a junior college have occupational prestige scores that are 5.97 points higher, on average.
+
+> Compared to people with a high school diploma, people with a bachelor's degree have occupational prestige scores that are 9.89 points higher, on average.
+
+> Compared to people with a high school diploma, people with a graduate degree have occupational prestige scores that are 18.38 points higher, on average.
+
+### Question 8 {.tabset .tabset-fade}
+#### Problem
+Use the `lm()` function to regress occupational prestige on job satisfaction.  Treat job satisfaction as a continuous (`numeric` class) variable. Provide a well-written interpretation of the coefficient. [Hint: make sure the categories of job satisfaction are in a meaningful order before coercing to a `numeric` class.]
+
+#### Answer
+To treat job satisfaction as a continuous variable, we first have to make sure the categories are in a sensible order:
+```{r order}
+table(gss$satjob)
+```
+The categories are not in order.  We need to use `fct_relevel()` to place the categories in order from most unsatisfied to most satisfied.  Then we use `as.numeric()` to coerce this variable to the `numeric` class:
+```{r releveljobsat}
+gss <- mutate(gss, satjob = fct_relevel(satjob,
+                                        "very dissatisfied",
+                                        "a little dissat",
+                                        "mod. satisfied",
+                                        "very satisfied"),
+              jobsat = as.numeric(satjob))
+```
+Here is the R console output:
+```{r reg5}
+reg <- lm(prestg10 ~ jobsat, data=gss)
+summary(reg)
+```
+And here is the `stargazer` output:
+```{r stargaze5, results="asis", message=FALSE}
+stargazer(reg,
+          type = "html",
+          title = "Does job satisfaction have anything to do with occupational prestige?",
+          dep.var.labels = "Occupational prestige",
+          covariate.labels = c("Job satisfaction"))
+```     
+
+The interpretation of the coefficient is as follows:
+
+> For every one level increase in job satisfaction, occupational prestige increases by 2.63 points, on average. (No control variables to report)
+
+### Question 9 {.tabset .tabset-fade}
+#### Problem
+Use the `lm()` function to regress occupational prestige on income, sex, age, and job satisfaction (treated as a continuous variable). Display the table of regression results.  Here's a list of things I might say about these results.  For each item in this list, explain why I might say that, and also explain why I am full of sh*t for saying this ^[That's not to say that these statements aren't true, but it's a mistake to interpret the regression results in this way.]:
+
+* Income is the strongest predictor of occupational prestige
+
+* Job satisfaction is the strongest predictor of occupational prestige
+
+* A one-unit increase in sex is associated with a 2.094 decrease in occupational prestige, on average, after controlling for income, age, and job satisfaction.
+
+#### Answer
+Here is the R console output:
+```{r reg6}
+reg <- lm(prestg10 ~ conrinc + sex + age + jobsat, data=gss)
+summary(reg)
+```
+And here is the `stargazer` output:
+```{r stargaze6, results="asis", message=FALSE}
+stargazer(reg,
+          type = "html",
+          title = "Does income have anything to do with occupational prestige?",
+          dep.var.labels = "Occupational prestige",
+          covariate.labels = c("Income", "Male", "Age",
+                               "Job satisfaction"))
+```     
+
+I might say "Income is the strongest predictor of occupational prestige" because income has the smallest p-value of all four predictors.  That statement confuses small p-values with big effects.  All the p-value tells us is that, assuming that income has no effect on prestige, the probability of calculating a t-statistic with an absolute value of more than 13 is very low.  So we reject the notion that income has no effect at all.  But that doesn't tell us anything about the size of the effect of income, other than it being nonzero.  In fact, in part 2, question 3, we concluded that income has a very small effect on prestige.
+
+I might say "Job satisfaction is the strongest predictor of occupational prestige" because job satisfaction has the largest coefficient in the regression table. After all, coefficients represent effects and it is a mistake to confuse p-values with effect sizes, so why not interpret the largest coefficient as the biggest effect? The reason why we should not do that is because each coefficient is tied to the units of the X it refers to.  To compare two coefficients is therefore to compare a unit of one X to a unit of another, usually an apples-to-oranges comparison. Also, we can make coefficients arbitrarily large or small just by changing the units of each X (see part 2, question 3 again). In this case, if we were to compare the coefficient on job satifaction to the coefficient on income, we are comparing a one-level increase in job satisfaction (going from a little unsatisfied to mostly satisfied, for example) to a $1 increase in income. We could change that, and compare a level of job satisfaction to $1000, $1000, or even $7500000 increase in income, which would change which coefficient is bigger.  But even so, in none of these cases is it meaningful to compare satisfaction levels to dollar amounts.
+
+I might say "A one-unit increase in sex is associated with a 2.094 decrease in occupational prestige, on average, after controlling for income, age, and job satisfaction" if I forgot how to interpret coefficients for binary X variables. The correct interpretation begins "Men, as compared to women, ..."
+
+
+### Question 10 {.tabset .tabset-fade}
+#### Problem
+Use the `lm()` function to regress occupational prestige on sex and display the regression table. Then:  
+
+* Provide a well-written interpretation of the coefficient on sex.  
+
+* Display and interpret the 95% confidence interval for this coefficient, and provide both the plain-spoken and technical interpretations of the confidence interval.  
+
+* Finally, interpret the $p$-value.
+
+#### Answer
+Here is the R console output:
+```{r reg3}
+reg <- lm(prestg10 ~ sex, data=gss)
+summary(reg)
+```
+And the confidence interval:
+```{r confint}
+confint(reg)
+```
+And here is the `stargazer` output (with confidence intervals):
+```{r stargaze3, results="asis", message=FALSE}
+stargazer(reg,
+          type = "html",
+          title = "Does sex have anything to do with occupational prestige?",
+          dep.var.labels = "Occupational prestige",
+          covariate.labels = c("Male"),
+          ci = TRUE)
+```     
+
+The interpretation of the coefficient is:
+
+> Men, as compared to women, have occupational prestige scores that are 0.2475 points higher, on average. (No control variables to report here)
+
+The standard interpretation of the confidence interval is
+
+> With 95% confidence we expect the true difference between the average occupational prestige for men and women to be between -0.761 and 1.256.
+
+The techincal, most accurate interpretation of the confidence interval is
+
+> If we were to draw repeated random samples and run the same regression on each sample, then 95% of the models' 95% confidence intervals would contain the true parameter.  Therefore, there is a .95 probability that the interval between -0.761 and 1.256 contains the true parameter.
+
+The p-value is interpreted as
+
+> Assuming that there is no difference between men and women, there is a .63 probablity that the absolute value of the $t$ statistic would be .481 or more.
+
+Since this p-value is larger than the .05 standard, we cannot reject the idea that there is no difference between men and women. (That doesn't mean we accept this assumption, it just means that we can't rule out this possibility.)
+
+## Part 2: Thinking about $p$-values
+Please read the article "The ASA’s Statement on $p$-Values: Context, Process, and Purpose", which appeared to much controversy in *The American Statistician* in 2016.  Then answer the following questions:
+
+### Question 1 {.tabset .tabset-fade}
+#### Problem
+Why did the board of the American Statistics Association decide to produce this statement about $p$-values? 
+
+#### Answer
+The ASA produced this statement in response to the growing amount of attention being paid to flaws in the p-value approach to inference and the highly visible articles that point out these flaws. Furthermore, the ASA wished to consider the properties of p-value hypothesis tests with regard to making research reproducible and replicable: "[T]he Board envisioned that the ASA statement on p-values and statistical significance would shed light on an aspect of our field that is too often misunderstood and misused in the broader research community, and, in the process, provide the community a service" (3)
+
+### Question 2 {.tabset .tabset-fade}
+#### Problem
+What are three ways in which the ASA committee says $p$-values ar misused and misunderstood?
+
+#### Answer
+P-values are sometimes interpreted as the probability that the null hypothesis (that the regression coefficient is 0, for example) is true.  But p-values never provide evidence about whether the null is true, simply whether enough evidence exists to conclude that it is false.
+
+Saying that a p-value is the probability that the result is due to random chance alone misunderstands a p-value, which always refers to a specific hypothesis, such the hypothesis that a coefficient is zero.
+
+There's nothing magical about a threshold such as p < .05: "A conclusion does not immediately become 'true' on one side of the divide and 'false' on the other" (9). While drawing a yes or no conclusion is often important, it is a mistake to place an undue amount of emphasis on the threshold.
+
+### Question 3 {.tabset .tabset-fade}
+#### Problem
+What is $p$-hacking, and what does the committee recommend researchers do to avoid p-hacking?
+
+#### Answer
+p-hacking is the practice of conducting many hypothesis tests in the same analysis, and only reporting the ones that are significant. With a p < .05 threshold we expect one out of every 20 tests to return a significant finding when the truth is that none of the effects exist. If I run 20 hypothesis tests and one is significant, then I should report all 20 tests so that reviewers can see for themselves that this test is probably a false positive.
+
+### Question 4 {.tabset .tabset-fade}
+#### Problem
+What does the committee conclude about $p$-values?  Do you feel that this conclusion provides clear guidence to researchers who use statistics?
+
+#### Answer
+The committee concludes that p-values are simply one tool out of many for understanding relationships that exist within data, and that it is a mistake to favor p-values over all the other approaches.  Personally, I feel that this conclusion is weak.  As a researcher I have no idea what I should do -- it will depend on the conventions in my field.  The ASA committee, seeing the diversity of approaches across all fields that apply statistics, chose not to lay down clear guidelines here.
