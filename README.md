@@ -45,7 +45,7 @@ Scholars, policy makers, union leaders, and development professionals have all s
 3. Click "My Interactive Sessions"
 4. Click "R Studio Server"
 5. Change "Number of Hours" to 3
-6. Under "Allocation" type: sds_kropkoclass
+6. Under "Allocation" type: SDS_Kropkoclass
 7. The R Studio Server box is blue while the system loads, wait for it to turn green
 8. Click "Connect to R Studio Server"
 9. (Just the first time you connect) Click on "terminal" (next to "console")
