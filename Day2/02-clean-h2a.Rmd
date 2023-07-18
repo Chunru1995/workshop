@@ -1,0 +1,79 @@
+---
+title: "Day 2: Cleaning the H-2A Data"
+author: Adam Slez
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = FALSE, echo = TRUE, warning = FALSE)
+```
+
+# Getting Started
+
+Before you get to work answering questions, you'll need to download the H-2A contract data (H-2A_Disclosure_Data_FY2021.xlsx) along with the codebook (H-2A_Record_Layout_FY2021.pdf), both of which can be found [here](https://www.dol.gov/agencies/eta/foreign-labor/performance).
+
+To complete this exercise, you will need to load the following libraries in R: `tidyverse`, `lubridate`, `readxl`, `here`.
+
+# Question 1
+
+Using the codebook, answer the questions below.
+
+### (a)
+
+### (b)
+
+Which variable tells us how many workers are ultimately tied to each contract?
+
+### (c)
+
+Which variables give us the best indication of where workers are living?
+
+### (d) 
+
+Which variables can be used to identify the period in which workers will actually be employed?
+
+# Question 2
+
+Using the `read_xlsx` command from the `readxl` package, read in the FY2021 H-2A contract data.
+
+# Question 3
+
+Use the `min` and `max` commands to identify the earliest and latest employment dates observed in the data (you could use `slice_min` and `slice_max` here as well). Based on what you see, discuss why using only the data provided will cause us to underestimate the number of H-2A workers employed in the 2021 calendar year.
+
+# Question 4
+
+Using the `filter` and `select` commands, create a new `data.frame` that is limited to valid contracts with employment in 2021 and contains information on the following variables:
+
+* Case number
+* Case status
+* The number of workers requested
+* The number of workers certified
+* The state in which contracted workers are going to live
+
+# Question 5
+
+Using your new dataset, answer the questions below.
+
+### (a)
+
+Using the `arrange` command, determine which contracts produced the highest and lowest number of certified workers (you could use `slice_min` and `slice_max` here as well).
+
+### (b) 
+
+Using the `mutate` command in conjunction with `arrange`, determine which contract had the greatest gap between the number of workers requested and the number of workers certified.
+
+### (c)
+
+Using the `group_by` and `summarize` commands, determine which case status was most closely associated with this type of gap. There are a number of ways to address this question. One approach is to start by using `filter` to find the contracts where the number of certified workers differs from the number of requested workers.
+
+# Question 6
+
+Do any of the variables in your new dataset contain missing or otherwise problematic values that would impede our ability to generate state-level estimates of the number of H-2A workers in the contiguious United States in 2021? If so, how do you plan to deal with them?
+
+# Question 7
+
+Using the `group_by` and `summarize` commands, create a new `data.frame` that includes information on the number of H-2A located in each of the states in the contiguous United States.
+
+# Question 8
+
+Use the `sum` command to calculate the estimated number of H-2A workers in the contiguous United States in 2021.
