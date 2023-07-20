@@ -1,0 +1,139 @@
+---
+title: "Day 4: Measuring and Mapping Using the ACS"
+author: Adam Slez
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = FALSE, echo = TRUE, warning = FALSE)
+```
+
+# Question 1
+
+Using the `get_acs` command, create a `data.frame` containing information on the incidence of poverty in the contiguous United States based on the one-year ACS estimates for 2021. Make sure to extract information on both the number of people in poverty, as well as the size of the total population for which poverty status is known. For convenience, the latter measure should be extracted using the `summary_var` option. In both instances, you will want the estimates along with the corresponding 95 percent margins of error.
+
+```{r poverty}
+#LOAD LIBRARIES
+library(tidyverse)
+library(tidycensus)
+library(tigris)
+
+#GET POVERTY DATA
+poverty <- get_acs(geography = "state", table = "B17001", survey = "acs1", 
+                   summary_var = "B17001_001", moe_level = 95) %>%
+  filter(variable == "B17001_002",
+         !NAME %in% c("Alaska", "Hawaii", 
+                       "District of Columbia", "Puerto Rico")) %>%
+  select(state = NAME, 
+         pov_est = estimate, pov_moe = moe,
+         pov_pop_est = summary_est, pov_pop_moe = summary_moe)
+```
+# Question 2
+
+Using the dataset that you just created, create a new dataset containing the name of each state, along with two additional variables---one representing the poverty rate (i.e., the ratio of the number of people in poverty to the number of people for whom poverty status is known) and another representing the corresponding margin of error. In both cases, you can use the `mutate` command to create the variable in question. To produce the appropriate margin of error, you will need to use the `moe_prop` command inside the `mutate` command.
+
+```{r rate}
+pov_rate <- poverty %>%
+  mutate(pov_rate_est = pov_est / pov_pop_est,
+         pov_rate_moe = moe_prop(pov_est, pov_pop_est, pov_moe, pov_pop_moe)) %>%
+  select(state, pov_rate_est, pov_rate_moe)
+```
+
+# Question 3
+
+According to these data, what is the estimated poverty rate for Virginia? Be sure to refer to both the point estimate, as well as the range of estimates suggested by the margin of error.
+
+```{r pov_va}
+pov_rate %>%
+  filter(state == "Virginia")
+```
+
+We estimate that roughly 10.2 percent of Virginians were in poverty at some point in the last 12 months. We are 95 percent confident that the percentage of Virginians in poverty lies between 9.88 and 10.52 percent (i.e., the observed data are consistent with population proportions equal to $0.102 \pm 0.0032$).
+
+# Question 3
+
+Use `ggplot` to graph the estimated poverty rate and corresponding confidence interval for each state. Make sure that the states are sorted according to the value of the estimated poverty rate. Describe what you find. How does Virginia fare relative to the rest of the country?
+
+```{r plot_rate}
+ggplot(pov_rate, aes(x = pov_rate_est, y = reorder(state, pov_rate_est))) + 
+  geom_errorbarh(aes(xmin = pov_rate_est - pov_rate_moe, 
+                     xmax = pov_rate_est + pov_rate_moe)) + 
+  geom_point() +
+  scale_x_continuous("Estimated Poverty Rate") +
+  scale_y_discrete("State") +
+  theme_bw()
+```
+
+Poverty rates in the United States vary considerably, ranging from a low of just under 7.25 percent in New Hampshire to a high of just under 20 percent in Louisiana. Not surprisingly, we observe noisier estimates in smaller states, as highlighted by the width of the error bars associated with states such as Wyoming and Vermont. We find that Virginia has one of the lowest poverty rates in the country behind New Hampshire, Utah, Minnesota, Colorado, Washington, and Connecticut.
+
+# Question 4
+
+Use the `states` command in the `tigris` packages to create an `sf` object containing information on the estimated poverty rate for each state in the contiguous United States. Rather than using `filter` to drop states from the `sf` object created by the `states` command, you can use an appropriately selected join function when you merge the poverty data.
+
+```{r state_pov, results = "hide"}
+pov_sf <- states(cb = TRUE) %>%
+  right_join(pov_rate, by = c("NAME" = "state"))
+```
+
+# Question 5
+
+Use `ggplot` in conjunction with the `sf` object that you just created to produce a choropleth map depicting the spatial distribution of poverty in the United States. Describe what you find.
+
+```{r pov_map}
+ggplot(pov_sf, aes(fill = pov_rate_est * 100)) +
+  geom_sf(color = "black", linewidth = 0.25) +
+  scale_fill_distiller("Estimated\npoverty rate (%)", palette = "YlOrBr") + 
+  theme_void()
+```
+
+Looking at the map, we see some evidence of spatial patterning, though it does not appear particularly strong. More specifically, we see some evidence of higher poverty rates across the southern part of the country, with Louisiana, Mississippi, and New Mexico standing out in particular. We also observe a clustering of low poverty states running from the Mid-Atlantic into New England.
+
+# Question 6
+
+In preparation for our session on multiple regression tomorrow, use the `get_acs` construct a `data.frame` object containing the following information for each state in the contiguous United States in 2021:
+
+* Percentage of the total population who identify as Hispanic
+* Percentage of the total population who identify as single-race non-Hispanic Black
+* Percentage of the total population who identify as single-race non-Hispanic American Indian/Alaskan Native
+
+As before, you should use the ACS one-year estimates. While you are technically extracting the information required to construct four separate variables, all of the relevant data exists as part of a single table. In this case, I think it is easier to work with the data in wide format. Don't forget to include a variable containing the name of each state!
+
+```{r race, results = "hide"}
+race <- get_acs(geography = "state", table = "B03002", 
+                survey = "acs1", output = "wide") %>%
+  filter(!NAME %in% c("Alaska", "Hawaii", 
+                      "District of Columbia", "Puerto Rico")) %>%
+  mutate(per_black = (B03002_004E / B03002_001E) * 100,
+         per_aian = (B03002_005E / B03002_001E) * 100,
+         per_hisp = (B03002_012E / B03002_001E) * 100) %>%
+  select(NAME, per_black, per_aian, per_hisp)
+```
+
+# Question 7
+
+In preparation for our session on multiple regression tomorrow, use the `get_acs` construct a `data.frame` object containing the following information for each state in the contiguous United States in 2021:
+
+* The size of the civilian labor force
+* Percentage of the civilian labor force employed in agriculture, forestry, fishing and hunting, and mining
+
+As before, you should use the ACS one-year estimates. Don't forget to include a variable containing the name of each state!
+
+```{r agriculture, results = "hide"}
+agriculture <- get_acs(geography = "state", table = "C24070", 
+                       survey = "acs1", summary_var = "C24070_001") %>%
+  filter(variable == "C24070_002",
+         !NAME %in% c("Alaska", "Hawaii", 
+                       "District of Columbia", "Puerto Rico")) %>% 
+  mutate(per_ag = (estimate / summary_est) * 100) %>%
+  select(NAME, per_ag, clf = summary_est)
+```
+
+# Question 8
+
+Use an appropriately selected join command to create a new `sf` object by merging the `sf` object containing information on state-level poverty rates with the `data.frame` objects you just created containing information on (a) racial and ethnic composition and (b) the share of the civilian labor force in agriculture, forestry, fishing and hunting, and mining.
+
+```{r state_sf, results = "hide"}
+state_sf <- pov_sf %>%
+  left_join(race) %>%
+  left_join(agriculture)
+```
