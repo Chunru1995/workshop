@@ -1,0 +1,43 @@
+---
+title: "Day 5: Using Regression to Model Poverty Rates"
+author: Adam Slez
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = FALSE, echo = TRUE, warning = FALSE)
+```
+
+# Question 1
+
+Using the code generated over the last several assignments, construct an `sf` object that includes information on the following variables for each state in the contiguous United States:
+
+* H-2A prevalence measured as a percentage of the size of the civilian labor force
+* Proportion of the population in poverty
+* Percentage of the population in poverty
+* Percentage of the total population who identify as Hispanic
+* Percentage of the total population who identify as single-race non-Hispanic Black
+* Percentage of the total population who identify as single-race non-Hispanic American Indian/Alaskan Native
+* Percentage of the civilian labor force employed in agriculture, forestry, fishing and hunting, and mining
+
+To complete this task, you will need to join the H-2A `data.frame` to the `sf` object containing the data from the ACS and then create a new variable representing H-2A prevalence by first dividing the number of H-2A workers in each state by the size of the civilian labor force and then multiplying by 100. 
+
+# Question 2
+
+Use the `ggplot` command to construct a scatterplot depicting the relationship between the poverty and H-2A prevalence. Make sure to include both a linear trend line, as well as a loess line. Given the relatively small number of data points, I would encourage you to use `geom_text` in place of `geom_point`. Describe what you find.
+
+# Question 3
+
+Use the `lm` command to estimate the bivariate regression model associated with the linear trend line from Question 1. Provide a substantive interpretation of both the intercept as well as the slope.
+
+# Question 4
+
+Use the `lm` command to estimate a multiple regression model depicting the state poverty rate as a function of the prevalence of H-2A workers, controlling for both racial and ethnic composition, as well as the share of civilian labor force employed in agriculture. Describe what happens to the H-2A coefficient when we control for the other variables? What does this suggest? 
+
+# Question 5
+
+Use the `ggplot` command to construct an added variable plot depicting the relationship between the poverty and H-2A prevalence, controlling for for (a) racial and ethnic composition and (b) the share of the civilian labor force in agriculture. Make sure to include both a linear trend line, as well as a loess line. Given the relatively small number of data points, I would encourage you to use `geom_text` in place of `geom_point`. Describe what you find, focusing in particular on the problem of non-linearity.
+
+# Question 6
+
+We know going in that a linear probability model is technically inappropriate for the data at hand. With this in mind, use the `glm` command to estimate a fractional logit model depicting the log-odds of poverty as a function of the prevalence of H-2A workers, controlling for both racial and ethnic composition, as well as the share of civilian labor force employed in agriculture (i.e., re-run the multiple linear regression model above using a fractional logit model). To do this, you will need the outcome to be represented as a proportion rather than a percentage. Based on these results, summarize the relationship between poverty and H-2A prevalence in terms of the average marginal effect of H-2A prevalence using the `avg_slopes` command in the `marginaleffects` packages. Make sure to use HC3 standard errors!
