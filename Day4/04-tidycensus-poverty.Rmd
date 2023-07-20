@@ -1,0 +1,57 @@
+---
+title: "Day 4: Measuring and Mapping Using the ACS"
+author: Adam Slez
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = FALSE, echo = TRUE, warning = FALSE)
+```
+
+# Question 1
+
+Using the `get_acs` command, create a `data.frame` containing information on the incidence of poverty in the contiguous United States based on the one-year ACS estimates for 2021. Make sure to extract information on both the number of people in poverty, as well as the size of the total population for which poverty status is known. For convenience, the latter measure should be extracted using the `summary_var` option. In both instances, you will want the estimates along with the corresponding 95 percent margins of error.
+
+
+# Question 2
+
+Using the dataset that you just created, create a new dataset containing the name of each state, along with two additional variables---one representing the poverty rate (i.e., the ratio of the number of people in poverty to the number of people for whom poverty status is known) and another representing the corresponding margin of error. In both cases, you can use the `mutate` command to create the variable in question. To produce the appropriate margin of error, you will need to use the `moe_prop` command inside the `mutate` command.
+
+# Question 3
+
+According to these data, what is the estimated poverty rate for Virginia? Be sure to refer to both the point estimate, as well as the range of estimates suggested by the margin of error.
+
+# Question 3
+
+Use `ggplot` to graph the estimated poverty rate and corresponding confidence interval for each state. Make sure that the states are sorted according to the value of the estimated poverty rate. Describe what you find. How does Virginia fare relative to the rest of the country?
+
+# Question 4
+
+Use the `states` command in the `tigris` packages to create an `sf` object containing information on the estimated poverty rate for each state in the contiguous United States. Rather than using `filter` to drop states from the `sf` object created by the `states` command, you can use an appropriately selected join function when you merge the poverty data.
+
+# Question 5
+
+Use `ggplot` in conjunction with the `sf` object that you just created to produce a choropleth map depicting the spatial distribution of poverty in the United States. Describe what you find.
+
+# Question 6
+
+In preparation for our session on multiple regression tomorrow, use the `get_acs` construct a `data.frame` object containing the following information for each state in the contiguous United States in 2021:
+
+* Percentage of the total population who identify as Hispanic
+* Percentage of the total population who identify as single-race non-Hispanic Black
+* Percentage of the total population who identify as single-race non-Hispanic American Indian/Alaskan Native
+
+As before, you should use the ACS one-year estimates. While you are technically extracting the information required to construct four separate variables, all of the relevant data exists as part of a single table. In this case, I think it is easier to work with the data in wide format. Don't forget to include a variable containing the name of each state!
+
+# Question 7
+
+In preparation for our session on multiple regression tomorrow, use the `get_acs` construct a `data.frame` object containing the following information for each state in the contiguous United States in 2021:
+
+* The size of the civilian labor force
+* Percentage of the civilian labor force employed in agriculture, forestry, fishing and hunting, and mining
+
+As before, you should use the ACS one-year estimates. Don't forget to include a variable containing the name of each state!
+
+# Question 8
+
+Use an appropriately selected join command to create a new `sf` object by merging the `sf` object containing information on state-level poverty rates with the `data.frame` objects you just created containing information on (a) racial and ethnic composition and (b) the share of the civilian labor force in agriculture, forestry, fishing and hunting, and mining.

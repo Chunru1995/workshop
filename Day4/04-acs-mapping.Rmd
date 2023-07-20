@@ -1,0 +1,37 @@
+---
+title: "Out-of-State Migrants in Virginia"
+author: "YOUR NAME HERE"
+date: "`r Sys.Date()`"
+output: html_document
+
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Getting Started
+
+According to the ACS five-year estimates, what percentage of the adult (i.e., 18+) population in each county in Virginia migrated from another state in 2021? 
+
+To answer this question, we will need the following libraries: `tidyverse`, `tidycensus`, `tigris`, `sf`, and `crsuggest`.
+
+If you haven't done so already, install your census API key using the following: `census_api_key("YOUR KEY GOES HERE", install = TRUE)`.
+
+# Using `load_variables` to Search for Data
+
+# Get Tabular Data
+
+Once we have the table number, we can get both the tabular and spatial data using the `get_acs` command, making sure to set the `state` option to restrict the data to Virginia.
+
+# Calculating Margins of Error for Derived Quantities
+
+We need to calculate the **percentage** of the adult population in each county in Virginia that migrated from another state in 2021. We would also like to calculate the corresponding margin of error. To make these easier, we will start by working on the numerator and denominator and separately...
+
+# Using `ggplot` to Plot County-Level Estimates
+
+We can use the `ggplot` command to plot point estimates (`geom_point`) and margins of error (`geom_errorbarh`). To make things a bit neater, we can use the `str_replace` command to delete the ", Virginia" from all the county names.
+
+# Using `ggplot` to Map the Distribution of Out-of-State Migrants
+
+To get started, we'll need to use `counties` to get the spatial data and then join the tabular data.  We'll use `scale_fill_distiller` to access palettes from ColorBrewer in a straightforward way.  Don't forget that we need to project our data!
