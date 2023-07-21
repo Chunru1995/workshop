@@ -1,0 +1,94 @@
+---
+title: "Out-of-State Migrants in Virginia"
+author: "Adam Slez"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Getting Started
+
+According to the ACS five-year estimates, what percentage of the adult (i.e., 18+) population in each county in Virginia migrated from another state in 2021? 
+
+To answer this question, we will need the following libraries: `tidyverse`, `tidycensus`, `tigris`, `sf`, and `crsuggest`.
+
+```{r}
+library(tidyverse)
+library(tidycensus)
+library(tigris)
+library(sf)
+library(crsuggest)
+```
+
+If you haven't done so already, install your census API key using the following: `census_api_key("YOUR KEY GOES HERE", install = TRUE)`.
+
+# Using `load_variables` to Search for Data
+
+```{r}
+var_df <- load_variables(year = 2021, dataset = "acs5")
+```
+
+# Get Tabular Data
+
+Once we have the table number, we can get both the tabular and spatial data using the `get_acs` command, making sure to set the `state` option to restrict the data to Virginia.
+
+```{r}
+va_sf_full <- get_acs(geography = "county", state = "Virginia", table = "B07001")
+```
+# Calculating Margins of Error for Derived Quantities
+
+We need to calculate the **percentage** of the adult population in each county in Virginia that migrated from another state in 2021. We would also like to calculate the corresponding margin of error. To make these easier, we will start by working on the numerator and denominator and separately...
+
+```{r}
+#total adults
+valid_total_vars <- c("B07001_004", "B07001_005", "B07001_006","B07001_007",
+                      "B07001_008", "B07001_009", "B07001_010", "B07001_011",
+                      "B07001_012", "B07001_013", "B07001_014", "B07001_015",
+                      "B07001_016")
+tot_adult <- filter(va_sf_full, variable %in% valid_total_vars) %>%
+  group_by(GEOID, NAME) %>%
+  summarize(tot_adult_est = sum(estimate),
+            tot_adult_moe = moe_sum(moe, estimate))
+
+#total migrants
+valid_adult_vars <- c("B07001_068", "B07001_069", "B07001_070", "B07001_071",
+                      "B07001_072", "B07001_073", "B07001_074", "B07001_075",
+                      "B07001_076", "B07001_077", "B07001_078", "B07001_079",
+                      "B07001_080")
+mig_adult <- filter(va_sf_full, variable %in% valid_adult_vars) %>%
+  group_by(GEOID, NAME) %>%
+  summarize(mig_adult_est = sum(estimate),
+            mig_adult_moe = moe_sum(moe, estimate))
+
+#combine
+mig_df <- tot_adult %>%
+  left_join(mig_adult) %>%
+  mutate(per_mig_est = (mig_adult_est / tot_adult_est) * 100,
+         per_mig_moe = moe_prop(mig_adult_est, tot_adult_est, 
+                                mig_adult_moe, tot_adult_moe) * 100)
+```
+
+# Using `ggplot` to Plot County-Level Estimates
+
+We can use the `ggplot` command to plot point estimates (`geom_point`) and margins of error (`geom_errorbarh`). To make things a bit neater, we can use the `str_replace` command to delete the ", Virginia" from all the county names.
+
+```{r}
+mig_df <- mig_df %>%
+  mutate(county = str_replace(NAME, ", Virginia", ""))
+ggplot(mig_df, aes(x = per_mig_est, y = reorder(county, per_mig_est))) + 
+  geom_errorbarh(aes(xmin = per_mig_est - per_mig_moe, 
+                     xmax = per_mig_est + per_mig_moe)) + 
+  geom_point() +
+  scale_x_continuous("Estimated Percentage of Out-of-State Migrants") +
+  scale_y_discrete("County") +
+  theme_bw()
+```
+
+# Using `ggplot` to Map the Distribution of Out-of-State Migrants
+
+To get started, we'll need to use `counties` to get the spatial data and then join the tabular data.  We'll use `scale_fill_distiller` to access palettes from ColorBrewer in a straightforward way.  Don't forget that we need to project our data!
