@@ -1,0 +1,80 @@
+---
+title: "Day 7: Exploratory Spatial Data Analysis"
+author: Adam Slez
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = FALSE, echo = TRUE, warning = FALSE)
+```
+
+# Question 1
+
+Using the code generated over the last several assignments, construct an `sf` object that includes information on H-2A prevalence measured as a percentage of the size of the civilian labor force for each state in the contiguous United States.
+
+```{r data_clean, results = "hide"}
+#LOAD LIBRARIES
+library(tidyverse)
+library(lubridate)
+library(tidycensus)
+library(tigris)
+library(readxl)
+library(here)
+library(spdep)
+
+#CLEAN DATA
+#h2a
+h2a_2021 <- read_xlsx(here("assignments/02-clean-h2a/", 
+                               "H-2A_Disclosure_Data_FY2021.xlsx")) %>%
+  filter(CASE_STATUS %in% c("Determination Issued - Certification",
+                            "Determination Issued - Partial Certification"),
+         year(EMPLOYMENT_BEGIN_DATE) < 2022,
+         year(EMPLOYMENT_END_DATE) > 2020) %>%
+  select(abbr = HOUSING_STATE, cert = TOTAL_WORKERS_H2A_CERTIFIED) %>%
+  group_by(abbr) %>%
+  summarize(h2a_count = sum(cert)) %>%
+  filter(!abbr %in% c("PR", "AK", "HI"))
+
+#acs
+agriculture <- get_acs(geography = "state", table = "C24070", 
+                       survey = "acs1", summary_var = "C24070_001") %>%
+  filter(variable == "C24070_002",
+         !NAME %in% c("Alaska", "Hawaii", 
+                       "District of Columbia", "Puerto Rico")) %>% 
+  mutate(per_ag = (estimate / summary_est) * 100) %>%
+  select(NAME, per_ag, clf = summary_est)
+
+#spatial data
+state_sf <- states(cb = TRUE) %>%
+  right_join(agriculture) %>%
+  right_join(h2a_2021, by = c("STUSPS" = "abbr")) %>%
+  mutate(per_h2a = (h2a_count / clf) * 100)
+```
+
+# Question 2
+
+Use `ggplot` in conjunction with the `sf` object that you just created to produce a choropleth map depicting the spatial distribution of H-2A workers in the United States. Describe what you find.
+
+# Question 3
+
+Use the `poly2nb` and `nb2listw` commands to construct a spatial weights matrix based on Queen contiguity. Use the `plot` command to overlay the resulting network on a map of the contiguous United States. Note that this will will require you to call the `plot` command twice. Don't forget that you will need use the `add = TRUE` option when you call `plot` the second time.
+
+# Question 4
+
+Using the spatial weights matrix that you just created, use the `moran.mc` command to calculate the Moran's $I$ statistic, as well as the corresponding test statistic, making sure to set the number of simulations to a sufficiently large number. Describe what you find.
+
+# Question 5
+
+Using the spatial weight matrix you just created in conjunction with the `lag.listw` command, add a spatially-lagged version of the H-2A variable to the `state_sf` object. Interpret the value of lagged measure associated with Virginia.
+
+# Question 6
+
+ Use the `ggplot` command to create a Moran scatterplot depicting the relationship between the lagged and unlagged versions of the H-2A variable. Don't forget to add appropriate trend and reference lines! (For the purposes of this question you don't need to worry about labeling influential observations.) Given the relatively small number of data points, I would encourage you to use `geom_text` in place of `geom_point`. Describe what you find.
+
+# Question 7
+
+Use the `localmoran` command to calculate LISA statistics for each of the states in the contiguous United States. Describe what you find, making sure to pay attention to not only the presence or absence of significance, but to the nature of the underlying spatial relationship, as indicated by the category in which the observation falls. Note that you can use back ticks to refer to columns with names containing spaces (e.g., <code>&grave;Pr(z != E(Ii))&grave;</code>).
+
+# Question 8
+
+Building on the results above, use the `ggplot` command to create a LISA map depicting which states have a significant LISA statistic, as well as which quadrant of the Moran scatterplot they fall. For the purposes of this exercise, you should use $p < 0.10$ as your threshold for significance. Describe what you find.
