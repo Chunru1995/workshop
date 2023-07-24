@@ -1,0 +1,577 @@
+origin_code,destination_code,mig_count_2000,origin_name,destination_name
+DZA,DZA,0,Algeria,Algeria
+DZA,ARG,0,Algeria,Argentina
+DZA,BRA,339,Algeria,Brazil
+DZA,CHN,44,Algeria,China
+DZA,CZE,330,Algeria,Czech Republic
+DZA,ECU,17,Algeria,Ecuador
+DZA,EGY,1695,Algeria,"Egypt, Arab Rep."
+DZA,ETH,79,Algeria,Ethiopia
+DZA,FIN,456,Algeria,Finland
+DZA,HND,3,Algeria,Honduras
+DZA,IDN,851,Algeria,Indonesia
+DZA,ISR,46734,Algeria,Israel
+DZA,JPN,179,Algeria,Japan
+DZA,LBR,0,Algeria,Liberia
+DZA,MDG,3953,Algeria,Madagascar
+DZA,NZL,109,Algeria,New Zealand
+DZA,PAK,303,Algeria,Pakistan
+DZA,SCG,611,Algeria,Serbia and Montenegro
+DZA,ESP,23269,Algeria,Spain
+DZA,CHE,3959,Algeria,Switzerland
+DZA,SYR,16,Algeria,Syrian Arab Republic
+DZA,THA,1882,Algeria,Thailand
+DZA,GBR,40555,Algeria,United Kingdom
+DZA,USA,11717,Algeria,United States
+ARG,DZA,0,Argentina,Algeria
+ARG,ARG,0,Argentina,Argentina
+ARG,BRA,27553,Argentina,Brazil
+ARG,CHN,207,Argentina,China
+ARG,CZE,312,Argentina,Czech Republic
+ARG,ECU,2183,Argentina,Ecuador
+ARG,EGY,330,Argentina,"Egypt, Arab Rep."
+ARG,ETH,0,Argentina,Ethiopia
+ARG,FIN,173,Argentina,Finland
+ARG,HND,139,Argentina,Honduras
+ARG,IDN,17,Argentina,Indonesia
+ARG,ISR,36951,Argentina,Israel
+ARG,JPN,3061,Argentina,Japan
+ARG,LBR,0,Argentina,Liberia
+ARG,MDG,3,Argentina,Madagascar
+ARG,NZL,382,Argentina,New Zealand
+ARG,PAK,0,Argentina,Pakistan
+ARG,SCG,875,Argentina,Serbia and Montenegro
+ARG,ESP,83803,Argentina,Spain
+ARG,CHE,1359,Argentina,Switzerland
+ARG,SYR,4,Argentina,Syrian Arab Republic
+ARG,THA,594,Argentina,Thailand
+ARG,GBR,10198,Argentina,United Kingdom
+ARG,USA,133210,Argentina,United States
+BRA,DZA,0,Brazil,Algeria
+BRA,ARG,36424,Brazil,Argentina
+BRA,BRA,0,Brazil,Brazil
+BRA,CHN,16246,Brazil,China
+BRA,CZE,116,Brazil,Czech Republic
+BRA,ECU,1077,Brazil,Ecuador
+BRA,EGY,141,Brazil,"Egypt, Arab Rep."
+BRA,ETH,8,Brazil,Ethiopia
+BRA,FIN,295,Brazil,Finland
+BRA,HND,171,Brazil,Honduras
+BRA,IDN,87,Brazil,Indonesia
+BRA,ISR,14516,Brazil,Israel
+BRA,JPN,242246,Brazil,Japan
+BRA,LBR,0,Brazil,Liberia
+BRA,MDG,25,Brazil,Madagascar
+BRA,NZL,646,Brazil,New Zealand
+BRA,PAK,0,Brazil,Pakistan
+BRA,SCG,180,Brazil,Serbia and Montenegro
+BRA,ESP,26797,Brazil,Spain
+BRA,CHE,8999,Brazil,Switzerland
+BRA,SYR,5,Brazil,Syrian Arab Republic
+BRA,THA,3087,Brazil,Thailand
+BRA,GBR,8853,Brazil,United Kingdom
+BRA,USA,225330,Brazil,United States
+CHN,DZA,0,China,Algeria
+CHN,ARG,4039,China,Argentina
+CHN,BRA,10287,China,Brazil
+CHN,CHN,0,China,China
+CHN,CZE,1241,China,Czech Republic
+CHN,ECU,1091,China,Ecuador
+CHN,EGY,471,China,"Egypt, Arab Rep."
+CHN,ETH,401,China,Ethiopia
+CHN,FIN,1993,China,Finland
+CHN,HND,434,China,Honduras
+CHN,IDN,81323,China,Indonesia
+CHN,ISR,32,China,Israel
+CHN,JPN,335495,China,Japan
+CHN,LBR,27,China,Liberia
+CHN,MDG,3767,China,Madagascar
+CHN,NZL,38332,China,New Zealand
+CHN,PAK,961,China,Pakistan
+CHN,SCG,39,China,Serbia and Montenegro
+CHN,ESP,23279,China,Spain
+CHN,CHE,6600,China,Switzerland
+CHN,SYR,68,China,Syrian Arab Republic
+CHN,THA,224153,China,Thailand
+CHN,GBR,94896,China,United Kingdom
+CHN,USA,1016412,China,United States
+CZE,DZA,14,Czech Republic,Algeria
+CZE,ARG,1493,Czech Republic,Argentina
+CZE,BRA,1030,Czech Republic,Brazil
+CZE,CHN,10,Czech Republic,China
+CZE,CZE,0,Czech Republic,Czech Republic
+CZE,ECU,116,Czech Republic,Ecuador
+CZE,EGY,260,Czech Republic,"Egypt, Arab Rep."
+CZE,ETH,0,Czech Republic,Ethiopia
+CZE,FIN,301,Czech Republic,Finland
+CZE,HND,5,Czech Republic,Honduras
+CZE,IDN,2,Czech Republic,Indonesia
+CZE,ISR,578,Czech Republic,Israel
+CZE,JPN,13,Czech Republic,Japan
+CZE,LBR,0,Czech Republic,Liberia
+CZE,MDG,0,Czech Republic,Madagascar
+CZE,NZL,668,Czech Republic,New Zealand
+CZE,PAK,51,Czech Republic,Pakistan
+CZE,SCG,6549,Czech Republic,Serbia and Montenegro
+CZE,ESP,1526,Czech Republic,Spain
+CZE,CHE,3833,Czech Republic,Switzerland
+CZE,SYR,30,Czech Republic,Syrian Arab Republic
+CZE,THA,68,Czech Republic,Thailand
+CZE,GBR,1123,Czech Republic,United Kingdom
+CZE,USA,73623,Czech Republic,United States
+ECU,DZA,0,Ecuador,Algeria
+ECU,ARG,2035,Ecuador,Argentina
+ECU,BRA,1188,Ecuador,Brazil
+ECU,CHN,0,Ecuador,China
+ECU,CZE,39,Ecuador,Czech Republic
+ECU,ECU,0,Ecuador,Ecuador
+ECU,EGY,0,Ecuador,"Egypt, Arab Rep."
+ECU,ETH,0,Ecuador,Ethiopia
+ECU,FIN,75,Ecuador,Finland
+ECU,HND,334,Ecuador,Honduras
+ECU,IDN,0,Ecuador,Indonesia
+ECU,ISR,2018,Ecuador,Israel
+ECU,JPN,0,Ecuador,Japan
+ECU,LBR,0,Ecuador,Liberia
+ECU,MDG,3,Ecuador,Madagascar
+ECU,NZL,53,Ecuador,New Zealand
+ECU,PAK,0,Ecuador,Pakistan
+ECU,SCG,202,Ecuador,Serbia and Montenegro
+ECU,ESP,176212,Ecuador,Spain
+ECU,CHE,1157,Ecuador,Switzerland
+ECU,SYR,0,Ecuador,Syrian Arab Republic
+ECU,THA,3,Ecuador,Thailand
+ECU,GBR,9796,Ecuador,United Kingdom
+ECU,USA,302705,Ecuador,United States
+EGY,DZA,169,"Egypt, Arab Rep.",Algeria
+EGY,ARG,266,"Egypt, Arab Rep.",Argentina
+EGY,BRA,3387,"Egypt, Arab Rep.",Brazil
+EGY,CHN,78,"Egypt, Arab Rep.",China
+EGY,CZE,158,"Egypt, Arab Rep.",Czech Republic
+EGY,ECU,36,"Egypt, Arab Rep.",Ecuador
+EGY,EGY,0,"Egypt, Arab Rep.","Egypt, Arab Rep."
+EGY,ETH,552,"Egypt, Arab Rep.",Ethiopia
+EGY,FIN,388,"Egypt, Arab Rep.",Finland
+EGY,HND,1,"Egypt, Arab Rep.",Honduras
+EGY,IDN,3335,"Egypt, Arab Rep.",Indonesia
+EGY,ISR,24672,"Egypt, Arab Rep.",Israel
+EGY,JPN,1091,"Egypt, Arab Rep.",Japan
+EGY,LBR,0,"Egypt, Arab Rep.",Liberia
+EGY,MDG,198,"Egypt, Arab Rep.",Madagascar
+EGY,NZL,1167,"Egypt, Arab Rep.",New Zealand
+EGY,PAK,50,"Egypt, Arab Rep.",Pakistan
+EGY,SCG,26,"Egypt, Arab Rep.",Serbia and Montenegro
+EGY,ESP,1631,"Egypt, Arab Rep.",Spain
+EGY,CHE,1710,"Egypt, Arab Rep.",Switzerland
+EGY,SYR,4723,"Egypt, Arab Rep.",Syrian Arab Republic
+EGY,THA,7367,"Egypt, Arab Rep.",Thailand
+EGY,GBR,26975,"Egypt, Arab Rep.",United Kingdom
+EGY,USA,118619,"Egypt, Arab Rep.",United States
+ETH,DZA,1,Ethiopia,Algeria
+ETH,ARG,0,Ethiopia,Argentina
+ETH,BRA,42,Ethiopia,Brazil
+ETH,CHN,3,Ethiopia,China
+ETH,CZE,80,Ethiopia,Czech Republic
+ETH,ECU,2,Ethiopia,Ecuador
+ETH,EGY,583,Ethiopia,"Egypt, Arab Rep."
+ETH,ETH,0,Ethiopia,Ethiopia
+ETH,FIN,660,Ethiopia,Finland
+ETH,HND,1,Ethiopia,Honduras
+ETH,IDN,0,Ethiopia,Indonesia
+ETH,ISR,66967,Ethiopia,Israel
+ETH,JPN,23,Ethiopia,Japan
+ETH,LBR,0,Ethiopia,Liberia
+ETH,MDG,2,Ethiopia,Madagascar
+ETH,NZL,643,Ethiopia,New Zealand
+ETH,PAK,16,Ethiopia,Pakistan
+ETH,SCG,7,Ethiopia,Serbia and Montenegro
+ETH,ESP,269,Ethiopia,Spain
+ETH,CHE,2231,Ethiopia,Switzerland
+ETH,SYR,142,Ethiopia,Syrian Arab Republic
+ETH,THA,0,Ethiopia,Thailand
+ETH,GBR,11796,Ethiopia,United Kingdom
+ETH,USA,71578,Ethiopia,United States
+FIN,DZA,4,Finland,Algeria
+FIN,ARG,0,Finland,Argentina
+FIN,BRA,165,Finland,Brazil
+FIN,CHN,16,Finland,China
+FIN,CZE,335,Finland,Czech Republic
+FIN,ECU,44,Finland,Ecuador
+FIN,EGY,146,Finland,"Egypt, Arab Rep."
+FIN,ETH,0,Finland,Ethiopia
+FIN,FIN,0,Finland,Finland
+FIN,HND,12,Finland,Honduras
+FIN,IDN,12,Finland,Indonesia
+FIN,ISR,84,Finland,Israel
+FIN,JPN,155,Finland,Japan
+FIN,LBR,0,Finland,Liberia
+FIN,MDG,0,Finland,Madagascar
+FIN,NZL,376,Finland,New Zealand
+FIN,PAK,2,Finland,Pakistan
+FIN,SCG,858,Finland,Serbia and Montenegro
+FIN,ESP,4340,Finland,Spain
+FIN,CHE,2634,Finland,Switzerland
+FIN,SYR,9,Finland,Syrian Arab Republic
+FIN,THA,441,Finland,Thailand
+FIN,GBR,1318,Finland,United Kingdom
+FIN,USA,23608,Finland,United States
+HND,DZA,0,Honduras,Algeria
+HND,ARG,0,Honduras,Argentina
+HND,BRA,136,Honduras,Brazil
+HND,CHN,9,Honduras,China
+HND,CZE,3,Honduras,Czech Republic
+HND,ECU,159,Honduras,Ecuador
+HND,EGY,1,Honduras,"Egypt, Arab Rep."
+HND,ETH,0,Honduras,Ethiopia
+HND,FIN,18,Honduras,Finland
+HND,HND,0,Honduras,Honduras
+HND,IDN,1,Honduras,Indonesia
+HND,ISR,5,Honduras,Israel
+HND,JPN,127,Honduras,Japan
+HND,LBR,14,Honduras,Liberia
+HND,MDG,0,Honduras,Madagascar
+HND,NZL,18,Honduras,New Zealand
+HND,PAK,0,Honduras,Pakistan
+HND,SCG,6,Honduras,Serbia and Montenegro
+HND,ESP,2824,Honduras,Spain
+HND,CHE,152,Honduras,Switzerland
+HND,SYR,0,Honduras,Syrian Arab Republic
+HND,THA,48,Honduras,Thailand
+HND,GBR,1,Honduras,United Kingdom
+HND,USA,288779,Honduras,United States
+IDN,DZA,3,Indonesia,Algeria
+IDN,ARG,0,Indonesia,Argentina
+IDN,BRA,83,Indonesia,Brazil
+IDN,CHN,8586,Indonesia,China
+IDN,CZE,89,Indonesia,Czech Republic
+IDN,ECU,22,Indonesia,Ecuador
+IDN,EGY,1521,Indonesia,"Egypt, Arab Rep."
+IDN,ETH,0,Indonesia,Ethiopia
+IDN,FIN,133,Indonesia,Finland
+IDN,HND,5,Indonesia,Honduras
+IDN,IDN,0,Indonesia,Indonesia
+IDN,ISR,4,Indonesia,Israel
+IDN,JPN,19130,Indonesia,Japan
+IDN,LBR,1,Indonesia,Liberia
+IDN,MDG,7,Indonesia,Madagascar
+IDN,NZL,3764,Indonesia,New Zealand
+IDN,PAK,79,Indonesia,Pakistan
+IDN,SCG,75,Indonesia,Serbia and Montenegro
+IDN,ESP,670,Indonesia,Spain
+IDN,CHE,1207,Indonesia,Switzerland
+IDN,SYR,2084,Indonesia,Syrian Arab Republic
+IDN,THA,869,Indonesia,Thailand
+IDN,GBR,55,Indonesia,United Kingdom
+IDN,USA,79796,Indonesia,United States
+ISR,DZA,1,Israel,Algeria
+ISR,ARG,1432,Israel,Argentina
+ISR,BRA,1778,Israel,Brazil
+ISR,CHN,38,Israel,China
+ISR,CZE,142,Israel,Czech Republic
+ISR,ECU,182,Israel,Ecuador
+ISR,EGY,1020,Israel,"Egypt, Arab Rep."
+ISR,ETH,6,Israel,Ethiopia
+ISR,FIN,442,Israel,Finland
+ISR,HND,65,Israel,Honduras
+ISR,IDN,17,Israel,Indonesia
+ISR,ISR,0,Israel,Israel
+ISR,JPN,562,Israel,Japan
+ISR,LBR,20,Israel,Liberia
+ISR,MDG,0,Israel,Madagascar
+ISR,NZL,542,Israel,New Zealand
+ISR,PAK,50,Israel,Pakistan
+ISR,SCG,9,Israel,Serbia and Montenegro
+ISR,ESP,912,Israel,Spain
+ISR,CHE,1100,Israel,Switzerland
+ISR,SYR,29,Israel,Syrian Arab Republic
+ISR,THA,611,Israel,Thailand
+ISR,GBR,7729,Israel,United Kingdom
+ISR,USA,125896,Israel,United States
+JPN,DZA,3,Japan,Algeria
+JPN,ARG,5348,Japan,Argentina
+JPN,BRA,70837,Japan,Brazil
+JPN,CHN,2212,Japan,China
+JPN,CZE,195,Japan,Czech Republic
+JPN,ECU,427,Japan,Ecuador
+JPN,EGY,1497,Japan,"Egypt, Arab Rep."
+JPN,ETH,7,Japan,Ethiopia
+JPN,FIN,610,Japan,Finland
+JPN,HND,101,Japan,Honduras
+JPN,IDN,1822,Japan,Indonesia
+JPN,ISR,74,Japan,Israel
+JPN,JPN,0,Japan,Japan
+JPN,LBR,2,Japan,Liberia
+JPN,MDG,72,Japan,Madagascar
+JPN,NZL,8482,Japan,New Zealand
+JPN,PAK,36,Japan,Pakistan
+JPN,SCG,20,Japan,Serbia and Montenegro
+JPN,ESP,2545,Japan,Spain
+JPN,CHE,3591,Japan,Switzerland
+JPN,SYR,21,Japan,Syrian Arab Republic
+JPN,THA,15779,Japan,Thailand
+JPN,GBR,59546,Japan,United Kingdom
+JPN,USA,500527,Japan,United States
+LBR,DZA,0,Liberia,Algeria
+LBR,ARG,0,Liberia,Argentina
+LBR,BRA,19,Liberia,Brazil
+LBR,CHN,6,Liberia,China
+LBR,CZE,9,Liberia,Czech Republic
+LBR,ECU,8,Liberia,Ecuador
+LBR,EGY,41,Liberia,"Egypt, Arab Rep."
+LBR,ETH,0,Liberia,Ethiopia
+LBR,FIN,38,Liberia,Finland
+LBR,HND,0,Liberia,Honduras
+LBR,IDN,4,Liberia,Indonesia
+LBR,ISR,11441,Liberia,Israel
+LBR,JPN,67,Liberia,Japan
+LBR,LBR,0,Liberia,Liberia
+LBR,MDG,0,Liberia,Madagascar
+LBR,NZL,47,Liberia,New Zealand
+LBR,PAK,12,Liberia,Pakistan
+LBR,SCG,0,Liberia,Serbia and Montenegro
+LBR,ESP,811,Liberia,Spain
+LBR,CHE,196,Liberia,Switzerland
+LBR,SYR,0,Liberia,Syrian Arab Republic
+LBR,THA,160,Liberia,Thailand
+LBR,GBR,307,Liberia,United Kingdom
+LBR,USA,42949,Liberia,United States
+MDG,DZA,0,Madagascar,Algeria
+MDG,ARG,0,Madagascar,Argentina
+MDG,BRA,51,Madagascar,Brazil
+MDG,CHN,9,Madagascar,China
+MDG,CZE,25,Madagascar,Czech Republic
+MDG,ECU,3,Madagascar,Ecuador
+MDG,EGY,49,Madagascar,"Egypt, Arab Rep."
+MDG,ETH,33,Madagascar,Ethiopia
+MDG,FIN,4,Madagascar,Finland
+MDG,HND,0,Madagascar,Honduras
+MDG,IDN,0,Madagascar,Indonesia
+MDG,ISR,0,Madagascar,Israel
+MDG,JPN,120,Madagascar,Japan
+MDG,LBR,0,Madagascar,Liberia
+MDG,MDG,0,Madagascar,Madagascar
+MDG,NZL,18,Madagascar,New Zealand
+MDG,PAK,9,Madagascar,Pakistan
+MDG,SCG,19,Madagascar,Serbia and Montenegro
+MDG,ESP,150,Madagascar,Spain
+MDG,CHE,451,Madagascar,Switzerland
+MDG,SYR,0,Madagascar,Syrian Arab Republic
+MDG,THA,0,Madagascar,Thailand
+MDG,GBR,31476,Madagascar,United Kingdom
+MDG,USA,3522,Madagascar,United States
+NZL,DZA,0,New Zealand,Algeria
+NZL,ARG,0,New Zealand,Argentina
+NZL,BRA,55,New Zealand,Brazil
+NZL,CHN,448,New Zealand,China
+NZL,CZE,35,New Zealand,Czech Republic
+NZL,ECU,38,New Zealand,Ecuador
+NZL,EGY,117,New Zealand,"Egypt, Arab Rep."
+NZL,ETH,12,New Zealand,Ethiopia
+NZL,FIN,95,New Zealand,Finland
+NZL,HND,2,New Zealand,Honduras
+NZL,IDN,68,New Zealand,Indonesia
+NZL,ISR,373,New Zealand,Israel
+NZL,JPN,3091,New Zealand,Japan
+NZL,LBR,0,New Zealand,Liberia
+NZL,MDG,26,New Zealand,Madagascar
+NZL,NZL,0,New Zealand,New Zealand
+NZL,PAK,146,New Zealand,Pakistan
+NZL,SCG,223,New Zealand,Serbia and Montenegro
+NZL,ESP,267,New Zealand,Spain
+NZL,CHE,709,New Zealand,Switzerland
+NZL,SYR,2,New Zealand,Syrian Arab Republic
+NZL,THA,3803,New Zealand,Thailand
+NZL,GBR,60530,New Zealand,United Kingdom
+NZL,USA,26771,New Zealand,United States
+PAK,DZA,1,Pakistan,Algeria
+PAK,ARG,0,Pakistan,Argentina
+PAK,BRA,172,Pakistan,Brazil
+PAK,CHN,2460,Pakistan,China
+PAK,CZE,94,Pakistan,Czech Republic
+PAK,ECU,18,Pakistan,Ecuador
+PAK,EGY,399,Pakistan,"Egypt, Arab Rep."
+PAK,ETH,129,Pakistan,Ethiopia
+PAK,FIN,390,Pakistan,Finland
+PAK,HND,5,Pakistan,Honduras
+PAK,IDN,672,Pakistan,Indonesia
+PAK,ISR,5420,Pakistan,Israel
+PAK,JPN,6029,Pakistan,Japan
+PAK,LBR,8,Pakistan,Liberia
+PAK,MDG,3007,Pakistan,Madagascar
+PAK,NZL,1304,Pakistan,New Zealand
+PAK,PAK,0,Pakistan,Pakistan
+PAK,SCG,136,Pakistan,Serbia and Montenegro
+PAK,ESP,8843,Pakistan,Spain
+PAK,CHE,2405,Pakistan,Switzerland
+PAK,SYR,6415,Pakistan,Syrian Arab Republic
+PAK,THA,4622,Pakistan,Thailand
+PAK,GBR,350867,Pakistan,United Kingdom
+PAK,USA,234081,Pakistan,United States
+ESP,DZA,1598,Spain,Algeria
+ESP,ARG,137084,Spain,Argentina
+ESP,BRA,43545,Spain,Brazil
+ESP,CHN,104,Spain,China
+ESP,CZE,171,Spain,Czech Republic
+ESP,ECU,3030,Spain,Ecuador
+ESP,EGY,968,Spain,"Egypt, Arab Rep."
+ESP,ETH,15,Spain,Ethiopia
+ESP,FIN,786,Spain,Finland
+ESP,HND,383,Spain,Honduras
+ESP,IDN,47,Spain,Indonesia
+ESP,ISR,75,Spain,Israel
+ESP,JPN,1523,Spain,Japan
+ESP,LBR,131,Spain,Liberia
+ESP,MDG,17,Spain,Madagascar
+ESP,NZL,337,Spain,New Zealand
+ESP,PAK,2,Spain,Pakistan
+ESP,SCG,1671,Spain,Serbia and Montenegro
+ESP,ESP,0,Spain,Spain
+ESP,CHE,88369,Spain,Switzerland
+ESP,SYR,15,Spain,Syrian Arab Republic
+ESP,THA,1681,Spain,Thailand
+ESP,GBR,60888,Spain,United Kingdom
+ESP,USA,119977,Spain,United States
+CHE,DZA,62,Switzerland,Algeria
+CHE,ARG,1820,Switzerland,Argentina
+CHE,BRA,2940,Switzerland,Brazil
+CHE,CHN,30,Switzerland,China
+CHE,CZE,388,Switzerland,Czech Republic
+CHE,ECU,669,Switzerland,Ecuador
+CHE,EGY,1836,Switzerland,"Egypt, Arab Rep."
+CHE,ETH,24,Switzerland,Ethiopia
+CHE,FIN,617,Switzerland,Finland
+CHE,HND,45,Switzerland,Honduras
+CHE,IDN,56,Switzerland,Indonesia
+CHE,ISR,966,Switzerland,Israel
+CHE,JPN,306,Switzerland,Japan
+CHE,LBR,64,Switzerland,Liberia
+CHE,MDG,211,Switzerland,Madagascar
+CHE,NZL,2756,Switzerland,New Zealand
+CHE,PAK,14,Switzerland,Pakistan
+CHE,SCG,20021,Switzerland,Serbia and Montenegro
+CHE,ESP,43159,Switzerland,Spain
+CHE,CHE,0,Switzerland,Switzerland
+CHE,SYR,74,Switzerland,Syrian Arab Republic
+CHE,THA,1578,Switzerland,Thailand
+CHE,GBR,5241,Switzerland,United Kingdom
+CHE,USA,51605,Switzerland,United States
+SYR,DZA,45,Syrian Arab Republic,Algeria
+SYR,ARG,2577,Syrian Arab Republic,Argentina
+SYR,BRA,3281,Syrian Arab Republic,Brazil
+SYR,CHN,100,Syrian Arab Republic,China
+SYR,CZE,441,Syrian Arab Republic,Czech Republic
+SYR,ECU,58,Syrian Arab Republic,Ecuador
+SYR,EGY,5534,Syrian Arab Republic,"Egypt, Arab Rep."
+SYR,ETH,32,Syrian Arab Republic,Ethiopia
+SYR,FIN,183,Syrian Arab Republic,Finland
+SYR,HND,3,Syrian Arab Republic,Honduras
+SYR,IDN,65,Syrian Arab Republic,Indonesia
+SYR,ISR,3859,Syrian Arab Republic,Israel
+SYR,JPN,135,Syrian Arab Republic,Japan
+SYR,LBR,6,Syrian Arab Republic,Liberia
+SYR,MDG,5,Syrian Arab Republic,Madagascar
+SYR,NZL,239,Syrian Arab Republic,New Zealand
+SYR,PAK,41,Syrian Arab Republic,Pakistan
+SYR,SCG,10,Syrian Arab Republic,Serbia and Montenegro
+SYR,ESP,2720,Syrian Arab Republic,Spain
+SYR,CHE,1090,Syrian Arab Republic,Switzerland
+SYR,SYR,0,Syrian Arab Republic,Syrian Arab Republic
+SYR,THA,148,Syrian Arab Republic,Thailand
+SYR,GBR,5646,Syrian Arab Republic,United Kingdom
+SYR,USA,55753,Syrian Arab Republic,United States
+THA,DZA,2,Thailand,Algeria
+THA,ARG,0,Thailand,Argentina
+THA,BRA,45,Thailand,Brazil
+THA,CHN,14829,Thailand,China
+THA,CZE,32,Thailand,Czech Republic
+THA,ECU,3,Thailand,Ecuador
+THA,EGY,992,Thailand,"Egypt, Arab Rep."
+THA,ETH,2,Thailand,Ethiopia
+THA,FIN,1705,Thailand,Finland
+THA,HND,0,Thailand,Honduras
+THA,IDN,981,Thailand,Indonesia
+THA,ISR,3,Thailand,Israel
+THA,JPN,31272,Thailand,Japan
+THA,LBR,0,Thailand,Liberia
+THA,MDG,2,Thailand,Madagascar
+THA,NZL,5064,Thailand,New Zealand
+THA,PAK,2,Thailand,Pakistan
+THA,SCG,7,Thailand,Serbia and Montenegro
+THA,ESP,470,Thailand,Spain
+THA,CHE,5980,Thailand,Switzerland
+THA,SYR,125,Thailand,Syrian Arab Republic
+THA,THA,0,Thailand,Thailand
+THA,GBR,32,Thailand,United Kingdom
+THA,USA,186520,Thailand,United States
+GBR,DZA,185,United Kingdom,Algeria
+GBR,ARG,2383,United Kingdom,Argentina
+GBR,BRA,4029,United Kingdom,Brazil
+GBR,CHN,3210,United Kingdom,China
+GBR,CZE,1436,United Kingdom,Czech Republic
+GBR,ECU,743,United Kingdom,Ecuador
+GBR,EGY,3179,United Kingdom,"Egypt, Arab Rep."
+GBR,ETH,1647,United Kingdom,Ethiopia
+GBR,FIN,2670,United Kingdom,Finland
+GBR,HND,75,United Kingdom,Honduras
+GBR,IDN,8517,United Kingdom,Indonesia
+GBR,ISR,21489,United Kingdom,Israel
+GBR,JPN,13718,United Kingdom,Japan
+GBR,LBR,493,United Kingdom,Liberia
+GBR,MDG,211,United Kingdom,Madagascar
+GBR,NZL,221729,United Kingdom,New Zealand
+GBR,PAK,558,United Kingdom,Pakistan
+GBR,SCG,2482,United Kingdom,Serbia and Montenegro
+GBR,ESP,86985,United Kingdom,Spain
+GBR,CHE,23360,United Kingdom,Switzerland
+GBR,SYR,641,United Kingdom,Syrian Arab Republic
+GBR,THA,5091,United Kingdom,Thailand
+GBR,GBR,0,United Kingdom,United Kingdom
+GBR,USA,833858,United Kingdom,United States
+USA,DZA,27,United States,Algeria
+USA,ARG,10338,United States,Argentina
+USA,BRA,13954,United States,Brazil
+USA,CHN,7748,United States,China
+USA,CZE,2117,United States,Czech Republic
+USA,ECU,10824,United States,Ecuador
+USA,EGY,6952,United States,"Egypt, Arab Rep."
+USA,ETH,125,United States,Ethiopia
+USA,FIN,3464,United States,Finland
+USA,HND,4946,United States,Honduras
+USA,IDN,2300,United States,Indonesia
+USA,ISR,70135,United States,Israel
+USA,JPN,50202,United States,Japan
+USA,LBR,267,United States,Liberia
+USA,MDG,231,United States,Madagascar
+USA,NZL,13258,United States,New Zealand
+USA,PAK,500,United States,Pakistan
+USA,SCG,22865,United States,Serbia and Montenegro
+USA,ESP,17204,United States,Spain
+USA,CHE,14729,United States,Switzerland
+USA,SYR,505,United States,Syrian Arab Republic
+USA,THA,6980,United States,Thailand
+USA,GBR,165086,United States,United Kingdom
+USA,USA,0,United States,United States
+SCG,DZA,6,Serbia and Montenegro,Algeria
+SCG,ARG,3109,Serbia and Montenegro,Argentina
+SCG,BRA,1655,Serbia and Montenegro,Brazil
+SCG,CHN,9,Serbia and Montenegro,China
+SCG,CZE,4841,Serbia and Montenegro,Czech Republic
+SCG,ECU,47,Serbia and Montenegro,Ecuador
+SCG,EGY,153,Serbia and Montenegro,"Egypt, Arab Rep."
+SCG,ETH,0,Serbia and Montenegro,Ethiopia
+SCG,FIN,1999,Serbia and Montenegro,Finland
+SCG,HND,3,Serbia and Montenegro,Honduras
+SCG,IDN,0,Serbia and Montenegro,Indonesia
+SCG,ISR,22471,Serbia and Montenegro,Israel
+SCG,JPN,37,Serbia and Montenegro,Japan
+SCG,LBR,0,Serbia and Montenegro,Liberia
+SCG,MDG,0,Serbia and Montenegro,Madagascar
+SCG,NZL,2609,Serbia and Montenegro,New Zealand
+SCG,PAK,28,Serbia and Montenegro,Pakistan
+SCG,SCG,0,Serbia and Montenegro,Serbia and Montenegro
+SCG,ESP,832,Serbia and Montenegro,Spain
+SCG,CHE,223145,Serbia and Montenegro,Switzerland
+SCG,SYR,672,Serbia and Montenegro,Syrian Arab Republic
+SCG,THA,22,Serbia and Montenegro,Thailand
+SCG,GBR,174,Serbia and Montenegro,United Kingdom
+SCG,USA,64520,Serbia and Montenegro,United States
