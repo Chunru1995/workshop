@@ -1,0 +1,83 @@
+---
+title: "Day 6: Network Analysis and Migration Flows"
+author: Adam Slez
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE, echo = TRUE, warning = FALSE)
+```
+
+# Getting Started
+
+Today we will learn how to the `tidygraph` and `ggraph` packages to manipulate, analyze, and visualize data on international migration flows. To do this, we will need to load the following libraries: `tidyverse`, `igraph`, `tidygraph`, `ggraph`, and `DT`.
+
+```{r, messages = FALSE}
+library(tidyverse)
+library(igraph)
+library(tidygraph)
+library(ggraph)
+library(DT)
+```
+
+
+# Load Data
+
+Use the `read_csv` command to load the `migration_2000.csv` and `totpop_2000.csv` files.
+
+# Drop Zero-Population Flows
+
+If you look at the data, you will see that some country pairs have a value of zero for the number of people moving from the origin to the destination. Before turning the data into a network/graph, you will want to drop rows that have a value of zero on the `mig_count_2000` variable. After dropping these rows, how many origins and destinations do you have?
+
+# Convert Flows to a Graph
+
+While we can do a ton of work with the current data, we can do even more if we convert it to a `tbl_graph` object. Toward this end, use the `as_tbl_graph` command to convert `mig_df` to a graph and merge the population data with the resulting node data.
+
+# Graph Properties
+
+Use the `count_components`, `diameter`, and `edge_density` commands to calculate the following measures:
+
+* Number of weakly connected components
+* Weighted diameter
+* Density
+
+#  Unweighted Degree Centrality
+
+Use the `centrality_degree` command to identify the top five countries associated with each of the following:
+
+* Total number of partners
+* Number of sending partners
+* Number of receiving partners
+
+# Weighted Degree Centrality
+
+Use the `centrality_degree` command to identify the top five countries associated with each of the following:
+
+* Total number of migrants
+* Number of incoming migrants
+* Number of outgoing migrants
+
+# Standardizing Flows
+
+Migration flows are often modeled using what is known as the gravity model, which takes its name from the equation for the amount of gravitational force between physical bodies. In the traditional gravity equation the force of attraction between any given pair of bodies is positively associated with the product of their masses. When applying this model to migration flows, we use population in place of mass, highlighting the idea that places with more people are likely to send and receive more people because they are bigger. With this in mind, it makes sense to redo our analysis of the weighted flow data using standardized flows, keeping in mind that flows can be standardized in terms of the population of either the origin or the destination.
+
+To do this, we'll need to (a) switch to the edge side of the data using the `activate` function, and then (b) attach the information on population, which lives on the node side of the data, to the edge data using the context accessor `.N()`.
+
+# Weighted Degree Centrality Revisited
+
+Use the `centrality_degree` command to identify the top five countries associated with each of the following:
+
+* Number of incoming migrants standardized by the population of the destination country
+* Number of outgoing migrants standardized by the population of the origin country
+
+# Plot Standardized Flows
+
+Use the `ggraph` command to plot destination-standardized flows.
+
+# Measure Coreness Using Eigenvector Centrality
+
+Use the `centrality_eigen` command to measure the coreness of each node based on both raw and destination-standardized flows.
+
+# Use a Blockmodel to Create a Simplied Representation of the Graph Depicting Connections Based on Raw Flows
+
+Construct a blockmodel using the original migration data. To collapse the data, you will want to use the `contract` command.
