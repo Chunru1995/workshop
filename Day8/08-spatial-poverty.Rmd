@@ -1,0 +1,106 @@
+---
+title: "Day 8: Spatial Regression"
+author: Adam Slez
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = FALSE, echo = TRUE, warning = FALSE)
+```
+
+# Question 1
+
+Using code generated over the course of the previous exercises, complete each of the tasks below.
+
+### (a)
+
+Construct an `sf` object that includes information on the following variables for each state in the contiguous United States:
+
+* H-2A prevalence measured as a percentage of the size of the civilian labor force
+* Percentage of the population in poverty
+* Percentage of the total population who identify as Hispanic
+* Percentage of the total population who identify as single-race non-Hispanic Black
+* Percentage of the total population who identify as single-race non-Hispanic American Indian/Alaskan Native
+* Percentage of the civilian labor force employed in agriculture, forestry, fishing and hunting, and mining
+
+```{r data_clean, results = "hide"}
+#LOAD LIBRARIES
+library(tidyverse)
+library(lubridate)
+library(tidycensus)
+library(tigris)
+library(readxl)
+library(here)
+library(spdep)
+library(spatialreg)
+
+#CLEAN DATA
+#h2a
+h2a_2021 <- read_xlsx(here("assignments/02-clean-h2a/", 
+                               "H-2A_Disclosure_Data_FY2021.xlsx")) %>%
+  filter(CASE_STATUS %in% c("Determination Issued - Certification",
+                            "Determination Issued - Partial Certification"),
+         year(EMPLOYMENT_BEGIN_DATE) < 2022,
+         year(EMPLOYMENT_END_DATE) > 2020) %>%
+  select(abbr = HOUSING_STATE, cert = TOTAL_WORKERS_H2A_CERTIFIED) %>%
+  group_by(abbr) %>%
+  summarize(h2a_count = sum(cert)) %>%
+  filter(!abbr %in% c("PR", "AK", "HI"))
+
+#acs
+poverty <- get_acs(geography = "state", table = "B17001", survey = "acs1", 
+                   summary_var = "B17001_001", moe_level = 95) %>%
+  filter(variable == "B17001_002",
+         !NAME %in% c("Alaska", "Hawaii", 
+                       "District of Columbia", "Puerto Rico")) %>%
+  mutate(pov_rate_est = estimate / summary_est,
+         per_pov = pov_rate_est * 100) %>%
+  select(NAME, pov_rate_est, per_pov)
+race <- get_acs(geography = "state", table = "B03002", 
+                survey = "acs1", output = "wide") %>%
+  filter(!NAME %in% c("Alaska", "Hawaii", 
+                      "District of Columbia", "Puerto Rico")) %>%
+  mutate(per_black = (B03002_004E / B03002_001E) * 100,
+         per_aian = (B03002_005E / B03002_001E) * 100,
+         per_hisp = (B03002_012E / B03002_001E) * 100) %>%
+  select(NAME, per_black, per_aian, per_hisp) 
+agriculture <- get_acs(geography = "state", table = "C24070", 
+                       survey = "acs1", summary_var = "C24070_001") %>%
+  filter(variable == "C24070_002",
+         !NAME %in% c("Alaska", "Hawaii", 
+                       "District of Columbia", "Puerto Rico")) %>% 
+  mutate(per_ag = (estimate / summary_est) * 100) %>%
+  select(NAME, per_ag, clf = summary_est)
+
+#spatial data
+state_sf <- states(cb = TRUE) %>%
+  right_join(poverty) %>%
+  right_join(race) %>%
+  right_join(agriculture) %>%
+  right_join(h2a_2021, by = c("STUSPS" = "abbr")) %>%
+  mutate(per_h2a = (h2a_count / clf) * 100)
+```
+
+### (b)
+
+Use the `lm` command to estimate a multiple regression model depicting the state poverty rate as a function of the prevalence of H-2A workers, controlling for both racial and ethnic composition, as well as the share of civilian labor force employed in agriculture, forestry, fishing and hunting, and mining.
+
+# Question 2
+
+Use the `ggplot` command to depict the spatial distribution of residuals. To do this, you will need to add a column to the `sf` object that you created in Question 1 containing information on the value of the residuals from the multiple regression model estimated in Question 2. The values of the residuals can be extracted using the `residuals` command. Once you have updated the `sf` object and plotted the spatial distribution of residuals, describe what you find.  
+
+# Question 3
+
+Use the `poly2nb` and `nb2listw` commands to construct a spatial weights matrix based on Queen contiguity. According to the results produced using the `moran.mc` and `lm.morantest` commands, what percent of the spatial autocorrelation associated with the state-level poverty variable is explained by the spatial distribution of H-2A prevalence, racial and ethnic composition, and the share of the civilian labor force employed in agriculture? Is there a reason to be concerned about residual spatial autocorrelation in these data?
+
+# Question 4 
+
+Use the `lm.LMtests` command to select an appropriate spatial regression model. Based on these results, which model would you select and why? Is there any ambiguity about which model you should select?
+
+# Question 5
+
+Use the `errorsarlm` and `lagsarlm` commands to re-estimate the multiple regression model using a spatial error and spatial lag model respectively. Describe what you find. Are there any noticable difference between the two sets of results? How do they compare to what you saw in the original multiple regression model, keeping in mind that the coefficients from the lag model aren't directly comparable to the coefficients from the other models. What do the measures of fit suggest about the choice between the error and lag models?
+
+# Question 6
+
+Use the `impacts` command to generate substantively interpretable estimates of the effect of each covariate, making sure to set the number of simulations to a sufficiently large number. Interpret the results associated with the H-2A variable. Generally speaking, what do the results suggest about the spatial dynamics implied by the model at hand?
